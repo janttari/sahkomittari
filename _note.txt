@@ -1,0 +1,11 @@
+nginx
+
+nginx proxy https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/ ja ks 485-palvelin
+
+flask+socket /yandex/työnalla/palvelin-flask
+
+
+/yandex/asiakirjat/kirjat_ja_oppaat/ohjelmointi/oma/python
+-python_suorita_pääohjelman_metodi_luokasta.pdf
+-raspi4-flask-lenopaneeli.pdf
+
