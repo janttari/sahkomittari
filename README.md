@@ -14,6 +14,6 @@ päivitys:
 asentuu hakemistoon /opt/sahkomittari/
 
 Asetukset tiedostoissa:
-* /opt/sahkomittari/raspisahkomittari.py
-* "/opt/sahkomittari/flaskpalvelin/__init__.py"
+    /opt/sahkomittari/raspisahkomittari.py
+    /opt/sahkomittari/flaskpalvelin/__init__.py
 
