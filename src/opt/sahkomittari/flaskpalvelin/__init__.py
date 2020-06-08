@@ -31,8 +31,8 @@ class FlaskPalvelin():
             uusi=data["nickname"] #selaimen lähettämässä nickname:ssa on asiakkaan nimi jota käytämme yksityisviesteihin
             self.clients.append([uusi,request.sid]) 
             if 'on_liittyi' in dir(__main__): #jos pääohjelmassa on tämän niminen metodi...
-                __main__.on_liittyi(uusi)            
-            
+                __main__.on_liittyi(uusi)
+
         @socketio.on('disconnect') #poistetaan lähtenyt asiakas listalta
         def on_disconnect_test():
             #print("discon:",request.sid)
@@ -44,27 +44,29 @@ class FlaskPalvelin():
                         __main__.on_poistui(self.clients[asindeksi])
                         del self.clients[asindeksi]
                     break
-                  
-            
+
         @self.app.route('/', methods=['GET']) 
         def __index():
             #print("index")
             resp=make_response(render_template('index.html'))
             return resp
 
-        @self.app.route('/piip', methods=['GET']) 
-        def __indexpiip():
-            #print("piip-index")
-            resp=make_response(render_template('piip/index.html'))
+        @self.app.route('/txt', methods=['GET']) 
+        def __indextxt():
+            if os.path.isfile("/dev/shm/kwh"):
+                with open("/dev/shm/kwh", "r") as kwhtiedosto:
+                    kwh=kwhtiedosto.read()
+            else:
+                kwh="---"
+            resp=make_response(kwh)
             return resp
-        
+
         @socketio.on('client_message') #selaimelta tulevaa dataa
         def __receive_message(data):
             if 'on_selaimelta' in dir(__main__): #jos pääohjelmassa on tämän niminen metodi...
                 __main__.on_selaimelta(data)
-        
         self.app.run(host='0.0.0.0', port=5555, threaded=True) #Huomaa että tän paikka on lopussa!
-        
+
     def elemArvot(self, json): #[vastaanottajat] jsondata
         jsondata='{"elementit": '+json+'}'
         #print(jsondata)

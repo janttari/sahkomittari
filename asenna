@@ -37,4 +37,5 @@ sudo systemctl stop sahkomittari
 echo "Käynnistetään palvelu..."
 sudo systemctl enable sahkomittari
 sudo systemctl start sahkomittari
+sudo systemctl daemon-reload
 echo "Asennus valmis!"

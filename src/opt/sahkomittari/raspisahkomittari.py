@@ -7,6 +7,7 @@ import time, os, sys
 PULSSIPINNI=24 #luetaan tästä GPIO-pinnistä pulssi
 imp=800 #pulssien määrä per kwh
 BOUNCETIME=300 #painonapilla tapahtuvaan testailuun 300 sopiva, mittarille sopiva ???
+kwhReaaliaikainen="/dev/shm/kwh" # Täällä on tallennettuna reaaliaikainen lukema. Tämä ei pysy tallessa jos raspin reboottaa!
 #----------------------------------------------------------------
 
 yks=1000/imp #yksi pulssi on näin monta wattia
@@ -34,6 +35,9 @@ def onPulssi(channel): #tää suoritetaan aina kun pulssi tulee
     global laskuri
     laskuri+=1 #kasvatetaan laskurin määrää yhdellä
     lahetaKwhJson()
+    kwh="{:.5f}".format(laskuri*yks/1000)
+    with open(kwhReaaliaikainen, "w") as tallenna:
+        tallenna.write(kwh)
 
 
 GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, bouncetime=BOUNCETIME) #määritellään että kun GPIO24 saa pulssin, suoritetaan funktio my_Pulssi
