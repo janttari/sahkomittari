@@ -52,8 +52,8 @@ if __name__ == "__main__":
             laskuri=int(pulssiTiedosto.read())
 
     while True:
-        if kierros % 10 == 0: #joka 60 kierros
-            with open(pulssiPysyva, "w") as pulssiTallenna:
+        if kierros % 10 == 0: #joka nn kierros
+            with open(pulssiPysyva, "w") as pulssiTallenna: #tallennetaan pulssien määrä pysyväksi
                 pulssiTallenna.write(str(laskuri))
         kierros+=1
         time.sleep(1)
