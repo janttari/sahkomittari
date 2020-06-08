@@ -8,6 +8,7 @@ PULSSIPINNI=24 #luetaan tästä GPIO-pinnistä pulssi
 imp=800 #pulssien määrä per kwh
 BOUNCETIME=300 #painonapilla tapahtuvaan testailuun 300 sopiva, mittarille sopiva ???
 kwhReaaliaikainen="/dev/shm/kwh" # Täällä on tallennettuna reaaliaikainen lukema. Tämä ei pysy tallessa jos raspin reboottaa!
+pulssiPysyva="/opt/sahkomittari/pulssi" #Tähän tallennetaan säännöllisin väliajoin pulssilukema
 #----------------------------------------------------------------
 
 yks=1000/imp #yksi pulssi on näin monta wattia
@@ -44,6 +45,16 @@ GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, bouncetime=BO
 
 if __name__ == "__main__":
     flask=flaskpalvelin.FlaskPalvelin()
+    kierros=0
+
+    if os.path.isfile(pulssiPysyva):
+        with open(pulssiPysyva, "r") as pulssiTiedosto:
+            laskuri=int(pulssiTiedosto.read())
+
     while True:
+        if kierros % 10 == 0: #joka 60 kierros
+            with open(pulssiPysyva, "w") as pulssiTallenna:
+                pulssiTallenna.write(str(laskuri))
+        kierros+=1
         time.sleep(1)
 
