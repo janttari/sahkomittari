@@ -4,7 +4,7 @@ import __main__ #tuodaan pääohjelma
 from flask import Flask, request, make_response, redirect, render_template
 from flask_socketio import SocketIO, emit
 import threading, time, logging, sys, pathlib, os.path, sys
-'''pääohjelmassa metodit on_liittynyt '''
+
 class FlaskPalvelin():
     __kaynnissa=False
     def __init__(self):
@@ -16,7 +16,6 @@ class FlaskPalvelin():
 
     def __flaskPalvelin(self):
         self.clients = [] # [[asiakas,sid][asiakas,sid]]
-        #self.app = Flask(__name__, template_folder='templates', static_url_path='/static', static_folder='static')
         self.app = Flask(__name__, template_folder='./templates', static_url_path='/static', static_folder='static')
         self.app.logger.disabled = True #hide flask messages
         log = logging.getLogger('werkzeug') #hide flask messages
