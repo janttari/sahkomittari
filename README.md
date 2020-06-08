@@ -19,5 +19,5 @@ Asetukset tiedostoissa:
 /opt/sahkomittari/flaskpalvelin/__init__.py #esim portti-numero
 ```
 
-  Oletuksena palvelu vastaa selaimella: http://<raspi_ip>:5555/
-  Raakatekstinä kWh-lukema: http://<raspi_ip>:5555/txt
+Oletuksena palvelu vastaa selaimella: http://<raspi_ip>:5555/  
+Raakatekstinä kWh-lukema: http://<raspi_ip>:5555/txt
