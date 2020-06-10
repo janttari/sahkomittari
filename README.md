@@ -15,9 +15,10 @@ asentuu hakemistoon /opt/sahkomittari/
 
 Asetukset tiedostoissa:
 ```
-/opt/sahkomittari/raspisahkomittari.py #esim pulssipinni, pulssia/kwh jne
-/opt/sahkomittari/flaskpalvelin/__init__.py #esim portti-numero
+/opt/sahkomittari/raspisahkomittari.py #esim pulssipinni, pulssia/kwh jne LAITA TÄNNE PALVELIMEN OSOITE!
 ```
 
-Oletuksena palvelu vastaa selaimella: http://<raspi_ip>:5555/  
-Raakatekstinä kWh-lukema: http://<raspi_ip>:5555/txt
+Luo systemd-palvelun.
+raspisahkomittari.py ottaa yhteyden palvelimeen ja lähettää sille sähkömittarin lukeman pulssin saatuaan. 
+Vastaanottoa voi kokeilla: server-testi
+
