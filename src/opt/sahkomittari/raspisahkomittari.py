@@ -42,7 +42,7 @@ def on_message(ws, message): #Tämä suoritetaan kun serveri lähettää meillep
     logprint(message)
 
 def on_error(ws, error):
-    print(error)
+    logprint(error)
 
 def on_close(ws): #Tämä tapahtuu kun yhteys on katkennut
     logprint("### closed ##base64#")
@@ -71,7 +71,6 @@ def lahetaKulutus(info=""): #Lähetetään selaimille kwh-lukema ja nykyinen kul
     ero=time.time()-edPulssi #edellisen pulssin ja nykyisen pulssin välillä on kulunut n sekuntia
     if info == "": #Mieti tää fiksummin, ihan paskaa purkkaa. Tarkoitus kuitenkin on että edellisen pulssin aikaa ei nollata alive-viestien kohdalla
         edPulssi=time.time()
-
     reaaliaikainen="{:.5f}".format(1000/yks/ero/1000) #kulutusta on tällä hetkellä kW
     if info != "" or edLahetysAika == 0 or time.time()-edLahetysAika>MAXTIHEYS: #Lähetetään vain sallitulla tiheydellä
         rivi='{"asiakas": "'+ASIAKAS+'", "kwh": "'+kwh+'", "pulssit": "'+str(pulssiLaskuri)+'", "reaaliaikainen": "'+reaaliaikainen+'", "info": "'+info+'"}'
