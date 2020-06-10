@@ -90,7 +90,7 @@ if __name__ == "__main__":
     if os.path.isfile(pulssiPysyva): #Jos on olemassa tallennettu pulssilukema
         with open(pulssiPysyva, "r") as pulssiTiedosto: #Luetaan pulssilukema tiedostosta
             pulssiLaskuri=int(pulssiTiedosto.read())
-    while True:
+    while True: #Suoritetaan tätä looppia ja tehdään täällä säännöllisesti tarvittavat toiminnot
         if kierros % tallennaPulssiSek == 0 and tallennettuPulssi != pulssiLaskuri:
             print("tallenapulssi")
             #ws.close()
