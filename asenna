@@ -10,20 +10,16 @@ fi
 
 echo "Tarkistetaan Python-pakettien riippuvuudet..."
 
-echo Flask
-if [[ -z $(pip3 list|grep "Flask\ ") ]]; then
-    echo Asennetaan Flask
-    sudo pip3 install flask 
-fi
 
-echo Flask-socketio
-if [[ -z $(pip3 list|grep "Flask-SocketIO") ]]; then
-    echo Asennetaan Flask-socketio
-    sudo pip3 install flask_socketio
+echo websocket-client
+if [[ -z $(pip3 list|grep "websocket-client") ]]; then
+    echo Asennetaan websocket-client
+    sudo pip3 install websocket-client
+
 fi
 
 echo RPi.GPIO
-if [[ -z $(pip3 list|grep "Flask-SocketIO") ]]; then
+if [[ -z $(pip3 list|grep "RPi.GPIO") ]]; then
     echo Asennetaan RPi.GPIO
     sudo pip3 install RPi.GPIO
 fi
