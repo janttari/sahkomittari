@@ -55,7 +55,7 @@ def laheta(sanoma): #Lähetä sanoma serverille päin
         logprint("Virhe viestin lähetyksessä!")
         reconnect()#Pyydetään avaamaan ws uudelleen
 
-def wsasiakas():
+def wsasiakas(): #Varsinainen ws-client. Suorita tähä threadina!
     global ws, PALVELIN
     websocket.enableTrace(False)
     ws = websocket.WebSocketApp(PALVELIN,
