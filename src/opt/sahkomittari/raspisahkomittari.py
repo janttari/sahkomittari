@@ -83,7 +83,7 @@ def onPulssi(channel): #tää suoritetaan aina kun pulssi tulee
     lahetaKulutus()
 
 if __name__ == "__main__":
-    GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, bouncetime=BOUNCETIME) #määritellään että kun GPIO24 saa pulssin, suoritetaan funktio my_Pulssi
+    GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, bouncetime=BOUNCETIME) #määritellään että kun GPIO-pinni saa pulssin, suoritetaan funktio my_Pulssi
     threadWsAsiakas=threading.Thread(target=wsasiakas)
     threadWsAsiakas.start()
     kierros=0
