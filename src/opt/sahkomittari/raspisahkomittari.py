@@ -73,7 +73,10 @@ def lahetaKulutus(info=""): #Lähetetään selaimille kwh-lukema ja nykyinen kul
         edPulssi=time.time()
     reaaliaikainen="{:.5f}".format(1000/yks/ero/1000) #kulutusta on tällä hetkellä kW
     if info != "" or edLahetysAika == 0 or time.time()-edLahetysAika>MAXTIHEYS: #Lähetetään vain sallitulla tiheydellä
-        rivi='{"asiakas": "'+ASIAKAS+'", "kwh": "'+kwh+'", "pulssit": "'+str(pulssiLaskuri)+'", "reaaliaikainen": "'+reaaliaikainen+'", "info": "'+info+'"}'
+        rivi='{"asiakas": "'+ASIAKAS+'", "kwh": "'+kwh+'", "pulssit": "'+str(pulssiLaskuri)+'", "reaaliaikainen": "'+reaaliaikainen+'"'
+        if info !="": #jos on ylimääräistä infoa lähetettäväksi, esim että tämä on vain alive viesti (alivessakin silti kannattaa lähettää lukemat, koska reaaliaikainen kulutushan mitataan edellisestä pulssista aikana
+            rivi+=', "info": "'+info+'"'
+        rivi+='}'
         laheta(rivi)
         edLahetysAika=time.time()
 
