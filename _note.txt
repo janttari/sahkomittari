@@ -9,3 +9,5 @@ flask+socket /yandex/työnalla/palvelin-flask
 -python_suorita_pääohjelman_metodi_luokasta.pdf
 -raspi4-flask-lenopaneeli.pdf
 
+/etc/hosts ip-->hostname
+cat /etc/hosts|grep "^192.168.4.245"|tr \\t ' '|rev|cut -d ' ' -f 1|rev #eli grepataan rivi jossa ip, sitten tabit spaceksi. huomioidaan jos välilyöntejä useampia, siksi rev...rev
