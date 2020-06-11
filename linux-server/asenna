@@ -1,0 +1,17 @@
+#!/bin/bash
+echo "Tarkistetaan ohjelmistopakettien riippuvuudet..."
+
+echo python3-pip
+if [[ -z $(dpkg -l|grep  python3-pip) ]]; then
+    echo Asennetaan python3-pip
+    sudo apt install -y python3-pip
+fi
+
+echo websocket_server ( https://github.com/Pithikos/python-websocket-server )
+if [[ -z $(pip3 list|grep "websocket-server        0.4") ]]; then
+    echo Asennetaan websocket_server
+    sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
+
+fi
+
+
