@@ -42,13 +42,6 @@ def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
     with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
         fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
     print("arvo",asiakasIP,kwh,pulssit,reaaliaikainen,info)
-        
-    #else:
-    #    if "alive" in jsmessage.get("info"): #alive-viestissäkin reaaliaikainen kulutustieto on voinut vielä laskea
-    #        reaaliaikainen=jsmessage.get("reaaliaikainen")
-    #        reaaliaikainenMuisti[asiakasIP]=reaaliaikainen
-            
-        
     print(kwhMuisti)
     print(pulssiMuisti)
 
