@@ -1,5 +1,5 @@
 # sahkomittari
-asennus _CLIENT RASPBERRY_:
+asennus **CLIENT RASPBERRY**:
 
     cd ~
     git clone https://github.com/janttari/sahkomittari.git
@@ -23,7 +23,7 @@ raspisahkomittari.py ottaa yhteyden palvelimeen ja lähettää sille sähkömitt
 Vastaanottoa voi kokeilla: server-testi
 
 -------
-asennus *LINUX SERVER*:
+asennus **LINUX SERVER**:
 
     cd ~
     git clone https://github.com/janttari/sahkomittari.git
