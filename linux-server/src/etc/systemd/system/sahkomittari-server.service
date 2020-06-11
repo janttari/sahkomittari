@@ -1,0 +1,14 @@
+[Unit]
+Description=Sahkomittari
+After=network.target
+
+[Service]
+ExecStart=/opt/sahkomittari-server/sahkomittari-server.py
+WorkingDirecty=/tmp
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target

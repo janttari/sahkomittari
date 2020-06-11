@@ -7,7 +7,7 @@ if [[ -z $(dpkg -l|grep  python3-pip) ]]; then
     sudo apt install -y python3-pip
 fi
 
-echo websocket_server ( https://github.com/Pithikos/python-websocket-server )
+echo "websocket_server ( https://github.com/Pithikos/python-websocket-server )"
 if [[ -z $(pip3 list|grep "websocket-server        0.4") ]]; then
     echo Asennetaan websocket_server
     sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
@@ -15,3 +15,13 @@ if [[ -z $(pip3 list|grep "websocket-server        0.4") ]]; then
 fi
 
 
+echo Kopioidaan tiedostot...
+sudo cp -R src/* /
+
+echo "Sammutetaan palvelu..."
+sudo systemctl stop sahkomittari-server
+echo "Käynnistetään palvelu..."
+sudo systemctl enable sahkomittari-server
+sudo systemctl start sahkomittari-server
+sudo systemctl daemon-reload
+echo "Asennus valmis!"
