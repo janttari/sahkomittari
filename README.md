@@ -3,12 +3,12 @@ asennus:
 
     cd ~
     git clone https://github.com/janttari/sahkomittari.git
-    cd sahkomittari
+    cd sahkomittari/raspberry-client
     sudo ./asenna
 
 päivitys:
 
-    cd ~/sahkomittari
+    cd ~/sahkomittari/raspberry-client
     ./paivita
 
 asentuu hakemistoon /opt/sahkomittari/
