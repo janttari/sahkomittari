@@ -1,3 +1,17 @@
+
+
+Täällä on mittarien tunneittain tallennettu tieto:
+/opt/sahkomittari-server/data/192.168.4.222
+20200611-111207;0.48500;388
+YYYYMMDD-HHMMSS;kokonaiskulutus;pulssit
+
+Täällä on reaaliaikainen seurantatieto esim www-palvelimelle:
+/dev/shm/sahkomittari/192.168.4.222 
+0.48500;0.02674;388
+kokonaiskulutus;reaaliaikainen;pulssit
+
+
+
 nginx
 
 nginx proxy https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/ ja ks 485-palvelin

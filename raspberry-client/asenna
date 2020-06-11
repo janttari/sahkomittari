@@ -1,0 +1,37 @@
+#!/bin/bash
+
+echo "Tarkistetaan ohjelmistopakettien riippuvuudet..."
+
+echo python3-pip
+if [[ -z $(dpkg -l|grep  python3-pip) ]]; then
+    echo Asennetaan python3-pip
+    sudo apt install -y python3-pip
+fi
+
+echo "Tarkistetaan Python-pakettien riippuvuudet..."
+
+
+echo websocket-client
+if [[ -z $(pip3 list|grep "websocket-client") ]]; then
+    echo Asennetaan websocket-client
+    sudo pip3 install websocket-client
+
+fi
+
+echo RPi.GPIO
+if [[ -z $(pip3 list|grep "RPi.GPIO") ]]; then
+    echo Asennetaan RPi.GPIO
+    sudo pip3 install RPi.GPIO
+fi
+
+
+echo Kopioidaan tiedostot...
+sudo cp -R src/* /
+
+echo "Sammutetaan palvelu..."
+sudo systemctl stop sahkomittari
+echo "Käynnistetään palvelu..."
+sudo systemctl enable sahkomittari
+sudo systemctl start sahkomittari
+sudo systemctl daemon-reload
+echo "Asennus valmis!"
