@@ -4,25 +4,35 @@
 #
 # sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
 # vaiko git clone ja setup??
-
+#
+#  testi pip3 install keyboard
+#
 SHMHAKEMISTO="/dev/shm/sahkomittari" # tänne tallentuu reaaliaikainen kulutustieto www-pavelinta ja muuta käyttöä varten. Ei säily rebootin jälkeen
 TALLENNAPYSYVA="/opt/sahkomittari-server/data" #Tänne kirjoitetaan pysyvät tiedot, jotka säilyy rebootin jälkeenkin.
 
 from websocket_server import WebsocketServer
 from datetime import datetime
-import time, threading, logging, sys, os, json, logging
+import time, threading, logging, sys, os, json, logging, urllib.parse
+#import keyboard
 
 viimTallennusaika="" #Tähän kirjoitetaan milloin pysyvät tiedostot on viimeksi tallennettu HH
 kwhMuisti={} # {'192.168.4.222': '0.45250'}
 pulssiMuisti={}
+asiakkaat={} #Tässä liittyneenä olevat asiakkaat
 
 logger = logging.getLogger('websocket_server.WebsocketServer')
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
-    global luelukkotiedosto
+    global luelukkotiedosto, asiakkaat
+    ip, portti=client['address'] #asiakkaan ip ja portti
+    asiakkaat[ip]=client
+    print("-----")
+    print(asiakkaat) 
+    print("**********")
     print("Uusi asiakas liittynyt tunnuksella %d" % client['id'])
+    print(client)
 
 def client_left(client, server):    #AINA KUN SELAIN KATKAISSUT YHTEYDEN
     pass    # Ei tehdä nyt mitään
@@ -32,18 +42,21 @@ def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
     asiakasIP, asiakasPortti=(client["address"])
     print(asiakasIP)
     jsmessage=json.loads(message)
-    #if not ("info" in jsmessage.keys() and "alive" in jsmessage.get("info")): #jos ei ole pelkkä alive tieto:
-    kwh=jsmessage.get("kwh")
-    pulssit=jsmessage.get("pulssit")
-    reaaliaikainen=jsmessage.get("reaaliaikainen")
-    info=jsmessage.get("info","-")
-    kwhMuisti[asiakasIP]=kwh
-    pulssiMuisti[asiakasIP]=pulssit
-    with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
-        fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
-    print("arvo",asiakasIP,kwh,pulssit,reaaliaikainen,info)
-    print(kwhMuisti)
-    print(pulssiMuisti)
+    if "konffi" in jsmessage: # asiakas lähettää konffitiedostonsa tänne qEI-KÄYTÖSSÄ
+        konffi=urllib.parse.unquote(jsmessage["konffi"])   # qEI-KÄYTÖSSÄ
+        print(asiakasIP, "-->", konffi)    #  qEI-KÄYTÖSSÄ
+    else: #kulutuslukemia tai alive tulee
+        kwh=jsmessage.get("kwh")
+        pulssit=jsmessage.get("pulssit")
+        reaaliaikainen=jsmessage.get("reaaliaikainen")
+        info=jsmessage.get("info","-")
+        kwhMuisti[asiakasIP]=kwh
+        pulssiMuisti[asiakasIP]=pulssit
+        with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
+            fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
+        print("arvo",asiakasIP,kwh,pulssit,reaaliaikainen,info)
+        print(kwhMuisti)
+        print(pulssiMuisti)
 
 def laheta(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
     server.send_message_to_all(viesti)
@@ -62,8 +75,12 @@ def tallennaPysyvat():
     for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan
         with open (TALLENNAPYSYVA+"/"+asiakasIP, "a") as fTallennaPysyva: #/opt/sahkomittari-server/data/192.168.4.222
             fTallennaPysyva.write(aika+";"+kwhMuisti[asiakasIP]+";"+pulssiMuisti[asiakasIP]+"\n") #20200614-120002;357
-    
     print("**TALLENNA")
+
+#def pyydaKonffi(asiakas): #Pyydetään asiakkaalta konffi. Parametrina asiakkaan ip-osoite
+#    kohde=asiakkaat[asiakas]
+#    print("kohde",kohde)
+#    server.send_message(kohde,"getKonffi")
 
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
     os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
@@ -73,6 +90,9 @@ if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
 
     kierros=0
     while True: # PÄÄLOOPPI
+        #if keyboard.is_pressed(chr(27)): 
+        #    print('Pyydetään konffi asiakkaalta!')
+        #    pyydaKonffi("192.168.4.222")
         time.sleep(1)
         kello=time.strftime("%H")
         if kello != viimTallennusaika and kierros!=0: #Jos tunti on vaihtunut:

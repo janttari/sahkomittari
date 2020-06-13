@@ -1,20 +1,31 @@
 #!/usr/bin/env python3
 # sudo pip3 install websocket-client
 import RPi.GPIO as GPIO
-import time, os, sys, socket, threading, websocket
+import time, os, sys, socket, threading, websocket, configparser, urllib.parse
 
 #----------------------------------------------------------------
-ASIAKAS="testiraspi" #Tämän laitteen asiakastunnus. Tää voi olla vähän turha, koska websocket_server client kertoo lähettäjän "address"
-PALVELIN='ws://192.168.4.150:8888/' #Palvelin johon otetaan yhteys
-PULSSIPINNI=24 #luetaan tästä GPIO-pinnistä pulssi
-imp=800 #pulssien määrä per kwh
-BOUNCETIME=300 #painonapilla tapahtuvaan testailuun 300 sopiva, mittarille sopiva ???
-MAXTIHEYS=1.5 #Lähetä korkeintaan näin tiheästi (sekuntia)
-ALIVE=10.0 #Lähetetään alive-sanoma jos muuta lähetystä ei ole näin pitkään aikaan ollut (sekuntia)
-pulssiPysyva="/opt/sahkomittari/pulssi" #Tähän tallennetaan säännöllisin väliajoin pulssilukema
-tallennaPulssiSek=3 #Tallenna pulssi tiedostoon joka n sekunti
+#ASIAKAS="testiraspi" #Tämän laitteen asiakastunnus. Tää voi olla vähän turha, koska websocket_server client kertoo lähettäjän "address"
+#PALVELIN='ws://192.168.4.150:8888/' #Palvelin johon otetaan yhteys
+#PULSSIPINNI=24 #luetaan tästä GPIO-pinnistä pulssi
+#imp=800 #pulssien määrä per kwh
+#BOUNCETIME=300 #painonapilla tapahtuvaan testailuun 300 sopiva, mittarille sopiva ???
+#MAXTIHEYS=1.5 #Lähetä korkeintaan näin tiheästi (sekuntia)
+#ALIVE=10.0 #Lähetetään alive-sanoma jos muuta lähetystä ei ole näin pitkään aikaan ollut (sekuntia)
+#pulssiPysyva="/opt/sahkomittari/pulssi" #Tähän tallennetaan säännöllisin väliajoin pulssilukema
+#tallennaPulssiSek=3 #Tallenna pulssi tiedostoon joka n sekunti
 #----------------------------------------------------------------
-
+skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin fyysinen sijainti configia varten
+config = configparser.ConfigParser(inline_comment_prefixes=('#', ';'))
+config.read(skriptinHakemisto+'/sahkomittari.ini')
+ASIAKAS=config['yleiset']['asiakas']
+PALVELIN=config['yleiset']['palvelin']
+PULSSIPINNI=int(config['yleiset']['pulssipinni'])
+imp=int(config['yleiset']['imp'])
+BOUNCETIME=int(config['yleiset']['bouncetime'])
+MAXTIHEYS=float(config['yleiset']['maxtiheys'])
+ALIVE=float(config['yleiset']['alive'])
+pulssiPysyva=config['yleiset']['pulssipysyva']
+tallennaPulssiSek=float(config['yleiset']['tallennapulssisek'])
 yks=1000/imp #yksi pulssi on näin monta wattia
 GPIO.setmode(GPIO.BCM) #pinnien numerointi https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/
 GPIO.setup(PULSSIPINNI, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #käytetään sisäistä alasvetoa
@@ -39,7 +50,9 @@ def on_open(ws): #Tämä suoritetaan kun ws-yhteyn on avattu
     pass #Ei tehdä nyt mitään
 
 def on_message(ws, message): #Tämä suoritetaan kun serveri lähettää meillepäin dataa
-    logprint(message)
+    #if message=="getKonffi":
+    #    getKonffi()
+    pass
 
 def on_error(ws, error):
     logprint(error)
@@ -84,6 +97,16 @@ def onPulssi(channel): #tää suoritetaan aina kun pulssi tulee
     global pulssiLaskuri, edPulssi
     pulssiLaskuri+=1 #kasvatetaan laskurin määrää yhdellä
     lahetaKulutus()
+
+
+#def getKonffi(): #Lähetetään palvelimelle config-tiedoston sisältö kun palvelin sitä pyytää
+#    global skriptinHakemisto
+#    print("GKK")
+#    with open (skriptinHakemisto+'/sahkomittari.ini', "r") as fKonffi:
+#        konffi=urllib.parse.quote(fKonffi.read())
+#    rivi='{"asiakas": "'+ASIAKAS+'", "konffi": "'+konffi+'"}'
+#    laheta(rivi)
+
 
 if __name__ == "__main__":
     GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, bouncetime=BOUNCETIME) #määritellään että kun GPIO-pinni saa pulssin, suoritetaan funktio my_Pulssi
