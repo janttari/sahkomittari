@@ -1,2 +1,2 @@
 #!/bin/bash
-git add * && git commit -m "edit" && git push
+git add * && git commit -m "gup" && git push
