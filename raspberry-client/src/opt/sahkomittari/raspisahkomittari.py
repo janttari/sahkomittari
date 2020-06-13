@@ -4,20 +4,9 @@ import RPi.GPIO as GPIO
 import time, os, sys, socket, threading, websocket, configparser, urllib.parse
 
 #----------------------------------------------------------------
-#ASIAKAS="testiraspi" #Tämän laitteen asiakastunnus. Tää voi olla vähän turha, koska websocket_server client kertoo lähettäjän "address"
-#PALVELIN='ws://192.168.4.150:8888/' #Palvelin johon otetaan yhteys
-#PULSSIPINNI=24 #luetaan tästä GPIO-pinnistä pulssi
-#imp=800 #pulssien määrä per kwh
-#BOUNCETIME=300 #painonapilla tapahtuvaan testailuun 300 sopiva, mittarille sopiva ???
-#MAXTIHEYS=1.5 #Lähetä korkeintaan näin tiheästi (sekuntia)
-#ALIVE=10.0 #Lähetetään alive-sanoma jos muuta lähetystä ei ole näin pitkään aikaan ollut (sekuntia)
-#pulssiPysyva="/opt/sahkomittari/pulssi" #Tähän tallennetaan säännöllisin väliajoin pulssilukema
-#tallennaPulssiSek=3 #Tallenna pulssi tiedostoon joka n sekunti
-#----------------------------------------------------------------
 skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin fyysinen sijainti configia varten
 config = configparser.ConfigParser(inline_comment_prefixes=('#', ';'))
 config.read(skriptinHakemisto+'/sahkomittari.ini')
-ASIAKAS=config['yleiset']['asiakas']
 PALVELIN=config['yleiset']['palvelin']
 PULSSIPINNI=int(config['yleiset']['pulssipinni'])
 imp=int(config['yleiset']['imp'])
@@ -86,7 +75,7 @@ def lahetaKulutus(info=""): #Lähetetään selaimille kwh-lukema ja nykyinen kul
         edPulssi=time.time()
     reaaliaikainen="{:.5f}".format(1000/yks/ero/1000) #kulutusta on tällä hetkellä kW
     if info != "" or edLahetysAika == 0 or time.time()-edLahetysAika>MAXTIHEYS: #Lähetetään vain sallitulla tiheydellä
-        rivi='{"asiakas": "'+ASIAKAS+'", "kwh": "'+kwh+'", "pulssit": "'+str(pulssiLaskuri)+'", "reaaliaikainen": "'+reaaliaikainen+'"'
+        rivi='{"kwh": "'+kwh+'", "pulssit": "'+str(pulssiLaskuri)+'", "reaaliaikainen": "'+reaaliaikainen+'"'
         if info !="": #jos on ylimääräistä infoa lähetettäväksi, esim että tämä on vain alive viesti (alivessakin silti kannattaa lähettää lukemat, koska reaaliaikainen kulutushan mitataan edellisestä pulssista aikana
             rivi+=', "info": "'+info+'"'
         rivi+='}'
