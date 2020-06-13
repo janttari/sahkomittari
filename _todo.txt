@@ -1,4 +1,3 @@
-kun raspberry sähkökatkon jälkeen käynnistyy ja pulssilukema on 0, niin se voisi palvelimelta pyytää tallennetun pulssilukeman ja jatkaa siitä laskemista
 
 kun serveri käynnistyy, se voisi /opt/sahkomittari-server/data hakea kwhmäärät ja pulssilukemat itselleen
 (eli jokaisen ip-kohtaisen tiedoston viimeisimmän rivin)
