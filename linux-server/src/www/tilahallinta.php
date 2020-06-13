@@ -5,7 +5,7 @@ $text = $_POST['update'];
 fwrite($open, $text);
 fclose($open);
 echo "Tiedosto tallennettu!<br />"; 
-echo "<meta http-equiv='refresh' content='2;url=tilahallinta.php'>";
+echo "<meta http-equiv='refresh' content='2;url=index.html'>";
 }else{
 $file = file("/opt/sahkomittari-server/asiakastiedot_tilat/tilat");
 echo "<form action=\"".$PHP_SELF."\" method=\"post\">";
