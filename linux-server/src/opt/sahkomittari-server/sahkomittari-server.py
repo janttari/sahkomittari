@@ -13,7 +13,7 @@ viimTallennusaika="" #Tähän kirjoitetaan milloin pysyvät tiedostot on viimeks
 kwhMuisti={} # {'192.168.4.222': '0.45250'}
 pulssiMuisti={} #ip:pulssit
 mittariRaspit={} #Tässä liittyneenä olevat mittari-raspit ip:ws_client
-selaimet=[] #Tässä liittyneenä olevat www-selaimet  ws_client:ip
+selaimet=[] #Tässä liittyneenä olevat www-selaimet  ws_client
 logger = logging.getLogger('websocket_server.WebsocketServer')
 logger.setLevel(logging.CRITICAL)
 logger.addHandler(logging.StreamHandler())
@@ -32,10 +32,9 @@ def new_client(client, server):    #Uusi asiakas avannut yhteyden.
 def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut yhteyden
     asiakasIP, asiakasPortti=(client["address"])
     if client in selaimet: #tämä asiakas oli selain
-        #selaimet.pop(str(client)) #poistetaan se selaimista
-        for a in range(0, len(selaimet)):
+        for a in range(0, len(selaimet)): #käydään kaikki selaimet läpi ja etsitään indeksi
             if selaimet[a] == client:
-                selaimet.pop(a)
+                selaimet.pop(a) #poistetaan index-numerolla selain listasta
     elif asiakasIP in mittariRaspit: #tämä asiakas oli raspi
         mittariRaspit.pop(client)
 
@@ -57,9 +56,9 @@ def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
         #print("arvo",asiakasIP,kwh,pulssit,reaaliaikainen,info)
         #print(kwhMuisti)
         #print(pulssiMuisti)
-        aika=datetime.now().strftime("%H:%M:%S")
+        aika=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         #aika="<font color='red'>"+aika+"</font>"
-        lahetaSelaimille('{"elementit": [{"elementti": "'+asiakasIP+'_kwh", "arvo": "'+kwh+'"},{"elementti": "'+asiakasIP+'_nahty", "arvo": "'+aika+'"}]}') #kulutustiedot heti selaimen näytettäväksi
+        lahetaSelaimille('{"elementit": [{"elementti": "kwh_'+asiakasIP+'", "arvo": "'+kwh+'"},{"elementti": "nahty_'+asiakasIP+'", "arvo": "'+aika+'"}]}') #kulutustiedot heti selaimen näytettäväksi
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
     server.send_message_to_all(viesti)
