@@ -13,7 +13,7 @@ viimTallennusaika="" #Tähän kirjoitetaan milloin pysyvät tiedostot on viimeks
 kwhMuisti={} # {'192.168.4.222': '0.45250'}
 pulssiMuisti={} #ip:pulssit
 mittariRaspit={} #Tässä liittyneenä olevat mittari-raspit ip:ws_client
-selaimet={} #Tässä liittyneenä olevat www-selaimet  ip:ws_client
+selaimet=[] #Tässä liittyneenä olevat www-selaimet  ws_client:ip
 logger = logging.getLogger('websocket_server.WebsocketServer')
 logger.setLevel(logging.CRITICAL)
 logger.addHandler(logging.StreamHandler())
@@ -26,20 +26,21 @@ def new_client(client, server):    #Uusi asiakas avannut yhteyden.
     if cursor.fetchone()[0]>0: #Laite on mittari-raspberry
         mittariRaspit[ip]=client
     else: #Laite on jokin muu, eli www-selain
-        selaimet[ip]=client
+        selaimet.append(client)
     conn.close()
-
 
 def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut yhteyden
     asiakasIP, asiakasPortti=(client["address"])
-    if asiakasIP in selaimet: #tämä asiakas oli selain
-        selaimet.pop(asiakasIP) #poistetaan se selaimista
+    if client in selaimet: #tämä asiakas oli selain
+        #selaimet.pop(str(client)) #poistetaan se selaimista
+        for a in range(0, len(selaimet)):
+            if selaimet[a] == client:
+                selaimet.pop(a)
     elif asiakasIP in mittariRaspit: #tämä asiakas oli raspi
-        mittariRaspit.pop(asiakasIP)
+        mittariRaspit.pop(client)
 
 def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
     asiakasIP, asiakasPortti=(client["address"])
-    print(asiakasIP)
     jsmessage=json.loads(message)
     if "konffi" in jsmessage: # asiakas lähettää konffitiedostonsa tänne qEI-KÄYTÖSSÄ
         konffi=urllib.parse.unquote(jsmessage["konffi"])   # qEI-KÄYTÖSSÄ
@@ -53,9 +54,9 @@ def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
         pulssiMuisti[asiakasIP]=pulssit
         with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
             fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
-        print("arvo",asiakasIP,kwh,pulssit,reaaliaikainen,info)
-        print(kwhMuisti)
-        print(pulssiMuisti)
+        #print("arvo",asiakasIP,kwh,pulssit,reaaliaikainen,info)
+        #print(kwhMuisti)
+        #print(pulssiMuisti)
         aika=datetime.now().strftime("%H:%M:%S")
         #aika="<font color='red'>"+aika+"</font>"
         lahetaSelaimille('{"elementit": [{"elementti": "'+asiakasIP+'_kwh", "arvo": "'+kwh+'"},{"elementti": "'+asiakasIP+'_nahty", "arvo": "'+aika+'"}]}') #kulutustiedot heti selaimen näytettäväksi
@@ -65,8 +66,7 @@ def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
 
 def lahetaSelaimille(viesti): #Lähetetään kaikille www-selaimille
     for selain in selaimet:
-        print(selain,selaimet[selain])
-        server.send_message(selaimet[selain], viesti)
+        server.send_message(selain, viesti)
 
 def lahetaRaspeille(viesti): #Lähetetään kaikille raspeille
     pass
