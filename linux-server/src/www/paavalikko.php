@@ -2,48 +2,49 @@
 <head>
 <link rel="stylesheet" type="text/css" href="style.css?ver=1a">
 </head>
+<script src="js/reconnecting-websocket.js"></script>
 <script>
 
+//var socketUrl = 'ws://'+location.hostname+(location.port ? ':'+location.port: '')+'/p7777'; //    ws://domain:portti/p7777
+var socketUrl = 'ws://localhost:8888';
+var ws = new  ReconnectingWebSocket(socketUrl);
 
 
 function ruudulle(kentta, sanoma) { //tulosta kenttä:arvo
     document.getElementById(kentta).innerHTML = sanoma + '\n';
 }
 
-//var socketUrl = 'ws://'+location.hostname+(location.port ? ':'+location.port: '')+'/p7777'; //    ws://domain:portti/p7777
-var socketUrl = 'ws://localhost:8888';
-var ws = new WebSocket(socketUrl);
+
+
 
 ws.onopen = function() {
+    socketOK=true;
     ruudulle("yhteys","<font color='green'>YHDISTETTY");
 };
 
+
+
 ws.onclose = function() {
-   ruudulle("yhteys","<font color='red'>KATKAISTU</font>");
-    /*
-    var t = 5000;
-    var url = new URL(location.href); //tarkistetaan jos url rivillä on mute, niin välitetään se virhe.php:lle
-    var c = url.searchParams.get("mute");
-    var url="virhe.php";
-    
+    socketOK
+    ruudulle("yhteys","<font color='red'>KATKAISTU</font>");
     setTimeout(function () {
-        //window.location.href=url; //ohjataan selain virhesivulle
-    }, t * 2);
-    */
+		console.log("reconn");
+        reconn();
+    }, 2000);
+    
 };
 
 ws.onmessage = function(event) {
     var json = JSON.parse(event.data);
-                for (it in json.elementit){
-                    console.log(json.elementit[it]);
-                    if (document.getElementById(json.elementit[it].elementti)){
-                        document.getElementById(json.elementit[it].elementti).innerHTML = json.elementit[it].arvo;
-                    }
-                    else{
-                        console.log("elementtiä "+json.elementit[it].elementti+" ei ole!");    
-                    }
-                }
-
+        for (it in json.elementit){
+            console.log(json.elementit[it]);
+            if (document.getElementById(json.elementit[it].elementti)){
+                document.getElementById(json.elementit[it].elementti).innerHTML = json.elementit[it].arvo;
+            }
+            else{
+                console.log("elementtiä "+json.elementit[it].elementti+" ei ole!");    
+            }
+        }
 };
 
 </script>
