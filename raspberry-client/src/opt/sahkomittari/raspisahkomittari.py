@@ -41,7 +41,7 @@ def on_open(ws): #Tämä suoritetaan kun ws-yhteyn on avattu
 def on_message(ws, message): #Tämä suoritetaan kun serveri lähettää meillepäin dataa
     #if message=="getKonffi":
     #    getKonffi()
-    pass
+    print(message)
 
 def on_error(ws, error):
     logprint(error)
