@@ -1,5 +1,5 @@
 # sahkomittari
- asennus **RASPBERRY CLIENT**:
+asennus **RASPBERRY CLIENT**:
 
     cd ~
     git clone https://github.com/janttari/sahkomittari.git
