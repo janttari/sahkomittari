@@ -2,6 +2,9 @@
 # sudo pip3 uninstall websocket_server
 # sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
 #
+# Tässä ei ole ws-palvelua selaimelle. tehdään siitä kokonaan oma ohjelma tietoturvan vuoksi! se skripti voi käyttää /dev/shm ja inotify
+#
+
 SHMHAKEMISTO="/dev/shm/sahkomittari" # tänne tallentuu reaaliaikainen kulutustieto www-pavelinta ja muuta käyttöä varten. Ei säily rebootin jälkeen
 TALLENNAPYSYVA="/opt/sahkomittari-server/data" #Tänne kirjoitetaan pysyvät tiedot, jotka säilyy rebootin jälkeenkin.
 
@@ -13,7 +16,6 @@ viimTallennusaika="" #Tähän kirjoitetaan milloin pysyvät tiedostot on viimeks
 kwhMuisti={} # {'192.168.4.222': '0.45250'}
 pulssiMuisti={} #ip:pulssit
 mittariRaspit={} #Tässä liittyneenä olevat mittari-raspit ip:ws_client
-selaimet=[] #Tässä liittyneenä olevat www-selaimet  ws_client
 logger = logging.getLogger('websocket_server.WebsocketServer')
 logger.setLevel(logging.CRITICAL)
 logger.addHandler(logging.StreamHandler())
@@ -25,17 +27,12 @@ def new_client(client, server):    #Uusi asiakas avannut yhteyden.
     cursor=conn.execute('SELECT EXISTS(SELECT * from asiakkaat where ip="'+ip+'")')
     if cursor.fetchone()[0]>0: #Laite on mittari-raspberry
         mittariRaspit[ip]=client
-    else: #Laite on jokin muu, eli www-selain
-        selaimet.append(client)
-    conn.close()
+    else:
+        print("Laitetta", ip, "ei ole tietokannassa!")
 
 def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut yhteyden
     asiakasIP, asiakasPortti=(client["address"])
-    if client in selaimet: #tämä asiakas oli selain
-        for a in range(0, len(selaimet)): #käydään kaikki selaimet läpi ja etsitään indeksi
-            if selaimet[a] == client:
-                selaimet.pop(a) #poistetaan index-numerolla selain listasta
-    elif asiakasIP in mittariRaspit: #tämä asiakas oli raspi
+    if asiakasIP in mittariRaspit: #tämä asiakas oli raspi
         mittariRaspit.pop(client)
 
 def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
@@ -53,19 +50,9 @@ def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
         pulssiMuisti[asiakasIP]=pulssit
         with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
             fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
-        #print("arvo",asiakasIP,kwh,pulssit,reaaliaikainen,info)
-        #print(kwhMuisti)
-        #print(pulssiMuisti)
-        aika=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        #aika="<font color='red'>"+aika+"</font>"
-        lahetaSelaimille('{"elementit": [{"elementti": "kwh_'+asiakasIP+'", "arvo": "'+kwh+'"},{"elementti": "nahty_'+asiakasIP+'", "arvo": "'+aika+'"}]}') #kulutustiedot heti selaimen näytettäväksi
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
     server.send_message_to_all(viesti)
-
-def lahetaSelaimille(viesti): #Lähetetään kaikille www-selaimille
-    for selain in selaimet:
-        server.send_message(selain, viesti)
 
 def lahetaRaspeille(viesti): #Lähetetään kaikille raspeille
     pass
