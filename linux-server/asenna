@@ -1,18 +1,10 @@
 #!/bin/bash
 echo "Tarkistetaan ohjelmistopakettien riippuvuudet..."
 
-vaaditutpaketit=( "nginx"  "php7.3-cli" "php7.3-cgi" "php7.3-fpm" "fcgiwrap" "php7.3-sqlite3" "sqlite3" )
-for i in "${vaaditutpaketit[@]}"
-do
-    echo "$i..."
-    if [[ -z $(dpkg -l|grep  "$i") ]]; then
-        echo Asennetaan "$i"
-        sudo apt install -y "$i"
-    fi
-done
+sudo apt -y install nginx php7.3-cli php7.3-cgi php7.3-fpm fcgiwrap php7.3-sqlite3 sqlite3
 
 echo "websocket_server ( https://github.com/Pithikos/python-websocket-server )"
-if [[ -z $(pip3 list|grep "websocket-server        0.4") ]]; then
+if [[ -z $(pip3 list|grep "websocket-server"|grep "0.4") ]]; then
     echo Asennetaan websocket_server
     sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
 fi
