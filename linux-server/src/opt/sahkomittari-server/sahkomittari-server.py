@@ -35,7 +35,7 @@ def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut 
     if asiakasIP in mittariRaspit: #tämä asiakas oli raspi
         mittariRaspit.pop(client)
 
-def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
+def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
     asiakasIP, asiakasPortti=(client["address"])
     jsmessage=json.loads(message)
     if "konffi" in jsmessage: # asiakas lähettää konffitiedostonsa tänne qEI-KÄYTÖSSÄ
