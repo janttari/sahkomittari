@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # sudo pip3 install websocket-client
 import RPi.GPIO as GPIO
-import time, os, sys, socket, threading, websocket, configparser, urllib.parse
+import time, os, sys, socket, threading, websocket, configparser
 
 #----------------------------------------------------------------
 skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin fyysinen sijainti configia varten
@@ -39,15 +39,13 @@ def on_open(ws): #Tämä suoritetaan kun ws-yhteyn on avattu
     pass #Ei tehdä nyt mitään
 
 def on_message(ws, message): #Tämä suoritetaan kun serveri lähettää meillepäin dataa
-    #if message=="getKonffi":
-    #    getKonffi()
-    print(message)
+    pass
 
 def on_error(ws, error):
     logprint(error)
 
 def on_close(ws): #Tämä tapahtuu kun yhteys on katkennut
-    logprint("### closed ##base64#")
+    logprint("### closed")
     reconnect() #Yritetään avata yhteys uudelleen
 
 def laheta(sanoma): #Lähetä sanoma serverille päin
@@ -87,11 +85,12 @@ def onPulssi(channel): #tää suoritetaan aina kun pulssi tulee
     pulssiLaskuri+=1 #kasvatetaan laskurin määrää yhdellä
     lahetaKulutus()
 
-
-if __name__ == "__main__": GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, 
-    bouncetime=BOUNCETIME) #määritellään että kun GPIO-pinni saa pulssin, suoritetaan funktio my_Pulssi 
-    threadWsAsiakas=threading.Thread(target=wsasiakas) threadWsAsiakas.start() kierros=0 if 
-    os.path.isfile(pulssiPysyva): #Jos on olemassa tallennettu pulssilukema
+if __name__ == "__main__":
+    GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, bouncetime=BOUNCETIME) #määritellään että kun GPIO-pinni saa pulssin, suoritetaan funktio my_Pulssi
+    threadWsAsiakas=threading.Thread(target=wsasiakas)
+    threadWsAsiakas.start()
+    kierros=0
+    if os.path.isfile(pulssiPysyva): #Jos on olemassa tallennettu pulssilukema
         with open(pulssiPysyva, "r") as pulssiTiedosto: #Luetaan pulssilukema tiedostosta
             pulssiLaskuri=int(pulssiTiedosto.read())
     while True: #Suoritetaan tätä looppia ja tehdään täällä säännöllisesti tarvittavat toiminnot

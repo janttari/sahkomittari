@@ -21,19 +21,13 @@ logger.setLevel(logging.CRITICAL)
 logger.addHandler(logging.StreamHandler())
 
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
-    global mittariRaspit
-    ip, portti=client['address'] #asiakkaan ip ja portti
-    conn = sqlite3.connect(tietokanta) #Tarkistetaan onko kyseinen laite mittari-raspberry...
-    cursor=conn.execute('SELECT EXISTS(SELECT * from asiakkaat where ip="'+ip+'")')
-    if cursor.fetchone()[0]>0: #Laite on mittari-raspberry
-        mittariRaspit[ip]=client
-    else:
-        print("Laitetta", ip, "ei ole tietokannassa!")
+    pass
 
 def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut yhteyden
-    asiakasIP, asiakasPortti=(client["address"])
-    if asiakasIP in mittariRaspit: #tämä asiakas oli raspi
-        mittariRaspit.pop(client)
+    pass
+    #asiakasIP, asiakasPortti=(client["address"])
+    #if asiakasIP in mittariRaspit: #tämä asiakas oli raspi
+    #    mittariRaspit.pop(client)
 
 def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
     asiakasIP, asiakasPortti=(client["address"])
@@ -69,7 +63,8 @@ def kuuntelija(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
     server.run_forever()
 
 def tallennaPysyvat(): # muuta tää sqllitelle!
-    aika=aika=datetime.now().strftime("%Y%m%d-%H%M%S") #20200614-120002
+    #aika=aika=datetime.now().strftime("%Y%m%d-%H%M%S") #20200614-120002
+    aika=str(int(time.time())) #unix-aikaleima
     for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan
         with open (TALLENNAPYSYVA+"/"+asiakasIP, "a") as fTallennaPysyva: #/opt/sahkomittari-server/data/192.168.4.222
             fTallennaPysyva.write(aika+";"+kwhMuisti[asiakasIP]+";"+pulssiMuisti[asiakasIP]+"\n") #20200614-120002;357
