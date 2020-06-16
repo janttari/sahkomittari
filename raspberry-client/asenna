@@ -1,4 +1,9 @@
 #!/bin/bash
+rm -rf /tmp/sahkomittari.ini
+if [ -f "/opt/sahkomittari/sahkomittari.ini" ]; then
+    echo "Tiedosto /opt/sahkomittari/sahkomittari.ini on jo olemassa. Otetaan se talteen!"
+    cp /opt/sahkomittari/sahkomittari.ini /tmp/sahkomittari.ini
+fi
 
 echo "Tarkistetaan ohjelmistopakettien riippuvuudet..."
 
@@ -34,4 +39,10 @@ echo "Käynnistetään palvelu..."
 sudo systemctl enable sahkomittari
 sudo systemctl start sahkomittari
 sudo systemctl daemon-reload
+
+if [ -f "tmp/sahkomittari.ini" ]; then
+    echo "Palautetaan tiedosto /opt/sahkomittari/sahkomittari.ini!"
+    mv /tmp/sahkomittari.ini /opt/sahkomittari/sahkomittari.ini
+fi
+
 echo "Asennus valmis!"

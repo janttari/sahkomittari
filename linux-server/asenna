@@ -11,17 +11,23 @@ echo "websocket_server ( https://github.com/Pithikos/python-websocket-server )"
 if [[ -z $(pip3 list|grep "websocket-server        0.4") ]]; then
     echo Asennetaan websocket_server
     sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
+fi
 
+if [[ -z $(pip3 list|grep "watchdog") ]]; then
+    echo Asennetaan watchdog
+    sudo pip3 install watchdog
 fi
 
 
 echo Kopioidaan tiedostot...
 sudo cp -R src/* /
 
-echo "Sammutetaan palvelu..."
+echo "Sammutetaan palvelut..."
 sudo systemctl stop sahkomittari-server
-echo "Käynnistetään palvelu..."
-sudo systemctl enable sahkomittari-server
+echo "Käynnistetään palvelut..."
+sudo systemctl enable sahkomittari-server #palvelin joka vastaanottaa datan raspberryiltä
 sudo systemctl start sahkomittari-server
+sudo systemctl enable sahkomittari-ws-selaimille.service #tämä on websocket palvelija internet-selaimille
+sudo systemctl start sahkomittari-ws-selaimille.service
 sudo systemctl daemon-reload
 echo "Asennus valmis!"
