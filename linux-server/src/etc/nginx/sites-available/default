@@ -1,0 +1,32 @@
+server {
+    listen 80 default_server;
+	server_name _;
+    root /www;
+	location / {
+        index index.php index.html index.htm index.nginx-debian.html;
+		try_files $uri $uri/ =404;
+	}
+
+    location ~ \.cgi|pl|py$ {
+        include fastcgi_params;   # this is the stock fastcgi_params file supplied
+        fastcgi_pass unix:/var/run/fcgiwrap.socket;
+    }
+
+
+    location ~ \.php$ {
+        try_files               $uri =404;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
+    }
+
+    location ~ \.cgi|pl|py$ {
+        include fastcgi_params;   # this is the stock fastcgi_params file supplied in debian 6.0
+        fastcgi_index index.pl;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_pass unix:/var/run/fcgiwrap.socket;
+    }
+
+}
