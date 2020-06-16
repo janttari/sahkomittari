@@ -5,7 +5,7 @@
 <script>
 
 //var socketUrl = 'ws://'+location.hostname+(location.port ? ':'+location.port: '')+'/p7777'; //    ws://domain:portti/p7777
-var socketUrl = 'ws://localhost:8888';
+var socketUrl = 'ws://localhost:8889';
 var ws = new  WebSocket(socketUrl);
 
 function ruudulle(kentta, sanoma) { //tulosta kenttä:arvo

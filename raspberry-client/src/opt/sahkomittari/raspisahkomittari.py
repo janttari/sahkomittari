@@ -88,21 +88,10 @@ def onPulssi(channel): #tää suoritetaan aina kun pulssi tulee
     lahetaKulutus()
 
 
-#def getKonffi(): #Lähetetään palvelimelle config-tiedoston sisältö kun palvelin sitä pyytää
-#    global skriptinHakemisto
-#    print("GKK")
-#    with open (skriptinHakemisto+'/sahkomittari.ini', "r") as fKonffi:
-#        konffi=urllib.parse.quote(fKonffi.read())
-#    rivi='{"asiakas": "'+ASIAKAS+'", "konffi": "'+konffi+'"}'
-#    laheta(rivi)
-
-
-if __name__ == "__main__":
-    GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, bouncetime=BOUNCETIME) #määritellään että kun GPIO-pinni saa pulssin, suoritetaan funktio my_Pulssi
-    threadWsAsiakas=threading.Thread(target=wsasiakas)
-    threadWsAsiakas.start()
-    kierros=0
-    if os.path.isfile(pulssiPysyva): #Jos on olemassa tallennettu pulssilukema
+if __name__ == "__main__": GPIO.add_event_detect(PULSSIPINNI, GPIO.RISING, callback=onPulssi, 
+    bouncetime=BOUNCETIME) #määritellään että kun GPIO-pinni saa pulssin, suoritetaan funktio my_Pulssi 
+    threadWsAsiakas=threading.Thread(target=wsasiakas) threadWsAsiakas.start() kierros=0 if 
+    os.path.isfile(pulssiPysyva): #Jos on olemassa tallennettu pulssilukema
         with open(pulssiPysyva, "r") as pulssiTiedosto: #Luetaan pulssilukema tiedostosta
             pulssiLaskuri=int(pulssiTiedosto.read())
     while True: #Suoritetaan tätä looppia ja tehdään täällä säännöllisesti tarvittavat toiminnot

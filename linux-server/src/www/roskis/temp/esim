@@ -1,0 +1,55 @@
+ 2277  cd temp/
+ 2279  sqlite3 mydatabase.sqlite "CREATE TABLE person ( id int, name varchar(30), phone varchar(30) );"
+ 2283  sqlite3 mydatabase.sqlite "INSERT INTO person VALUES (1, 'Jim', '123446223');\
+INSERT INTO person VALUES (2, 'Tom', '232124303');\
+INSERT INTO person VALUES (3, 'Bill', '812947283');\
+INSERT INTO person VALUES (4, 'Alice', '351246233');"
+ 2291  sqlite3 mydatabase.sqlite "SELECT name from person where id=2"
+ 2292  sqlite3 mydatabase.sqlite "SELECT name from person where id=3"
+ 2293  sqlite3 mydatabase.sqlite "SELECT * from person where id=4"
+ 2294  history 
+
+
+
+
+
+
+
+
+
+
+
+.................................................................
+jani@jleno:/www/temp$ sqlite3 mydatabase.sqlite .dump
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE person ( id int, name varchar(30), phone varchar(30) );
+INSERT INTO person VALUES(1,'Jim','123446223');
+INSERT INTO person VALUES(2,'Tom','232124303');
+INSERT INTO person VALUES(3,'Bill','812947283');
+INSERT INTO person VALUES(4,'Alice','351246233');
+INSERT INTO person VALUES(5,'Jorma','12433446223');
+CREATE TABLE IF NOT EXISTS "asiakkaat" (
+        "ip"    TEXT,
+        "nimi"  TEXT,
+        "numero"        TEXT
+);
+INSERT INTO asiakkaat VALUES('192.168.1.1','Router','111');
+INSERT INTO asiakkaat VALUES('192.168.1.222','Raspi','134');
+COMMIT;
+
+
+
+
+
+
+
+
+
+
+
+
+
+.....................................................................
+sqlite3 mydatabase.sqlite 'SELECT * from asiakkaat where nimi="Raspi"'
+

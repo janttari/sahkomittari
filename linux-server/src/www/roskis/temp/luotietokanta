@@ -7,14 +7,12 @@ CREATE TABLE IF NOT EXISTS "asiakkaat" (
         "id"    INTEGER,
         "numero"        TEXT,
         "nimi"  TEXT,
-        "ip" TEXT,
         "info"  TEXT,
         PRIMARY KEY("id")
 );
 CREATE TABLE IF NOT EXISTS "kulutus" (
         "id"    INTEGER,
         "numero"        INTEGER,
-        "ip" TEXT,
         "kwh"   TEXT,
         "pulssit"       INTEGER,
         PRIMARY KEY("id")
@@ -22,4 +20,4 @@ CREATE TABLE IF NOT EXISTS "kulutus" (
 COMMIT;
 EOF
 )
-sqlite3 raspisahkomittari.db "$sql"
+sqlite3 testi.db "$sql"

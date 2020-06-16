@@ -1,0 +1,14 @@
+[Unit]
+Description=Sahkomittari-WS_selaimille
+After=network.target
+
+[Service]
+ExecStart=/opt/sahkomittari-server/sahkomittari-ws-selaimille.py
+WorkingDirecty=/tmp
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
