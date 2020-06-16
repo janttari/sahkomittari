@@ -18,7 +18,7 @@ Asetukset tiedostoissa:
 /opt/sahkomittari/raspisahkomittari.py #esim pulssipinni, pulssia/kwh jne LAITA TÄNNE PALVELIMEN OSOITE!
 ```
 
-Luo systemd-palvelun.
+Luo systemd-palvelun sahkomittari.service
 raspisahkomittari.py ottaa yhteyden palvelimeen ja lähettää sille sähkömittarin lukeman pulssin saatuaan. 
 Vastaanottoa voi kokeilla: server-testi
 
@@ -37,4 +37,6 @@ päivitys:
 
 
 asentuu /opt/sahkomittari-server/ 
-ja luo systemd servicen joka käynnistyy itsestään
+
+sahkomittari-server.service #vastaanottaa datan raspberryltä
+sahkomittari-ws-selaimille.service #lähettää dataa selaimille, kun /dev/shm/sahkomittari -hakemiston data muuttuu
