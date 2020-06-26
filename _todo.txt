@@ -1,3 +1,2 @@
+-serverille www-sivu, josta saadaan luotua uusi tietokanta ja siihen uudet asiakas-raspberryn tiedot ja muutettua olemassaolevia
 
-kun serveri käynnistyy, se voisi /opt/sahkomittari-server/data hakea kwhmäärät ja pulssilukemat itselleen
-(eli jokaisen ip-kohtaisen tiedoston viimeisimmän rivin)

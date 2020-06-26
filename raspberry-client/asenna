@@ -1,4 +1,5 @@
 #!/bin/bash
+sudo apt -y install git #lisää tää  listaan!
 rm -rf /tmp/sahkomittari.ini
 if [ -f "/opt/sahkomittari/sahkomittari.ini" ]; then
     echo "Tiedosto /opt/sahkomittari/sahkomittari.ini on jo olemassa. Otetaan se talteen!"

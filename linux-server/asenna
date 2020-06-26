@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Tarkistetaan ohjelmistopakettien riippuvuudet..."
 
-sudo apt -y install nginx php7.3-cli php7.3-cgi php7.3-fpm fcgiwrap php7.3-sqlite3 sqlite3 git
+sudo apt -y install nginx php7.3-cli php7.3-cgi php7.3-fpm fcgiwrap php7.3-sqlite3 sqlite3 git python3-pip
 
 echo "websocket_server ( https://github.com/Pithikos/python-websocket-server )"
 if [[ -z $(pip3 list|grep "websocket-server"|grep "0.4") ]]; then
