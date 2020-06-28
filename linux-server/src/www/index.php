@@ -77,6 +77,7 @@ ws.onmessage = function(event) {
     }
    
     $db_asiakkaat->close();
+    $db_kulutus->close();
 ?>
 
 </table>
