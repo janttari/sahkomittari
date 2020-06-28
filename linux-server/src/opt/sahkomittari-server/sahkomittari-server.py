@@ -45,7 +45,7 @@ def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
         kwhMuisti[asiakasIP]=kwh
         pulssiMuisti[asiakasIP]=pulssit
         with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
-            fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
+            fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit+";"+info) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
     server.send_message_to_all(viesti)

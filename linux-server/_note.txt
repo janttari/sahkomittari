@@ -10,3 +10,6 @@ koska nyt näyttää vain kun dataa tulee
 
 ***
 serveri tallentaa kulutus-tietokantaan lukemat tasatunnein
+
+reaaliaikainen tieto /dev/shm/sahkomittari-server/<ip>
+kulutus;reaaliaikainen;pulssit;info

@@ -34,10 +34,12 @@ ws.onmessage = function(event) {
             if (document.getElementById(json.elementit[it].elementti)){
                 document.getElementById(json.elementit[it].elementti).innerHTML = json.elementit[it].arvo;
                 elem=document.getElementById(json.elementit[it].elementti);
-                $(elem).addClass('red').delay(1000).queue(function(next){
-                $(this).removeClass('red');
-                next();
-                });
+                if (!( event.data.includes("alive"))){
+                    $(elem).addClass('red').delay(1000).queue(function(next){
+                    $(this).removeClass('red');
+                    next();
+                    });
+                }
                 
             }
             else{
@@ -52,14 +54,14 @@ ws.onmessage = function(event) {
 		<td>
             <div id="muu">Viim data: </div>
         </td>
+
 		<td>
             <div id="yhteys"><font size="-5" color="brown">ei_tiedossa</font>
         </td>
     </tr>
 </table>
 <br>
-
-<table border=1><tr><td width="300">nähty</td><td width=100>ip</td><td width="100">numero</td><td width="100">nimi</td><td width="100">kwh</td><td width="100">reaaliaik</td><td width="100">pulssit</td></tr>
+<table border=1><tr><td width="300">nähty</td><td width="100">ip</td><td width="100">numero</td><td width="100">nimi</td><td width="100">kwh</td><td width="100">reaaliaik</td><td width="100">pulssit</td><td width="100">info</td></tr>
 <?php 
     class MyDB extends SQLite3 {
         function __construct() {
@@ -73,7 +75,7 @@ ws.onmessage = function(event) {
 
     $ret = $db->query($sql);
     while($row = $ret->fetchArray(SQLITE3_ASSOC) ) {
-        echo "<tr><td id=nahty_".$row['ip'].">---</td</td---><td>". $row['ip'] . "</td><td>". $row['numero'] ."</td><td>". $row['nimi'] ."</td><td id=kwh_".$row['ip'].">---</td><td id=reaali_".$row['ip'].">---</td><td id=pulssit_".$row['ip'].">---</td></tr><br>";
+        echo "<tr><td id=nahty_".$row['ip'].">---</td></td---><td>". $row['ip'] . "</td><td>". $row['numero'] ."</td><td>". $row['nimi'] ."</td><td id=kwh_".$row['ip'].">---</td><td id=reaali_".$row['ip'].">---</td><td id=pulssit_".$row['ip'].">---</td></td><td id=info_".$row['ip'].">---</td></tr><br>";
     }
    
     $db->close();
