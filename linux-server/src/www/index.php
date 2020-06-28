@@ -59,7 +59,7 @@ ws.onmessage = function(event) {
 </table>
 <br>
 
-<table border=1><tr><td width="300">nähty</td><td width=100>ip</td><td width="100">numero</td><td width="100">nimi</td><td width="100">kwh</td><td width="100">pulssit</td></tr>
+<table border=1><tr><td width="300">nähty</td><td width=100>ip</td><td width="100">numero</td><td width="100">nimi</td><td width="100">kwh</td><td width="100">reaaliaik</td><td width="100">pulssit</td></tr>
 <?php 
     class MyDB extends SQLite3 {
         function __construct() {
@@ -73,7 +73,7 @@ ws.onmessage = function(event) {
 
     $ret = $db->query($sql);
     while($row = $ret->fetchArray(SQLITE3_ASSOC) ) {
-        echo "<tr><td id=nahty_".$row['ip'].">---</td</td---><td>". $row['ip'] . "</td><td>". $row['numero'] ."</td><td>". $row['nimi'] ."</td><td id=kwh_".$row['ip'].">---</td><td id=pulssit_".$row['ip'].">---</td></tr><br>";
+        echo "<tr><td id=nahty_".$row['ip'].">---</td</td---><td>". $row['ip'] . "</td><td>". $row['numero'] ."</td><td>". $row['nimi'] ."</td><td id=kwh_".$row['ip'].">---</td><td id=reaali_".$row['ip'].">---</td><td id=pulssit_".$row['ip'].">---</td></tr><br>";
     }
    
     $db->close();

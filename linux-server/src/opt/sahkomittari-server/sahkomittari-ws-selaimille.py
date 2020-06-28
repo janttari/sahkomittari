@@ -6,8 +6,6 @@
 # Valvoo /dev/shm/sahkomittari -hakemiston muutoksia. Kun tiedosto muuttuu, lähetetään sen sisältö selaimille websocketilla
 #
 
-demo1pulssit=0
-demo2pulssit=0
 
 import time, threading, os, logging
 from watchdog.observers import Observer
@@ -16,11 +14,6 @@ from websocket_server import WebsocketServer
 from datetime import datetime
 
 SHMHAKEMISTO="/dev/shm/sahkomittari-server"
-
-def getDemo2pulssit():
-    global demo2pulssit
-    demo2pulssit+=1
-    return demo2pulssit
 
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
     print("liitt",client)
@@ -67,14 +60,16 @@ class Watcher: #Luokka valvoo muuttuneita tiedostoja
 class Handler(FileSystemEventHandler): #Kun tiedostot SHM-hakemistossa muuttuneet
     @staticmethod
     def on_any_event(event):
-        global demo2pulssit
         if event.is_directory:
             return None
         elif event.event_type == 'modified':
             print("Received modified event - %s." % event.src_path)
             aika=datetime.now().strftime("%H:%M:%S")
-            demo2pulssit=getDemo2pulssit()
-            lahetaBroadCast('{"elementit": [{"elementti": "nahty_192.168.4.150", "arvo": "'+aika+'"},{"elementti": "kwh_192.168.4.150", "arvo": "'+str(demo2pulssit*1.00/1000)+'"}, {"elementti": "pulssit_192.168.4.150", "arvo": "'+str(demo2pulssit)+'"}]}')
+            ip=os.path.basename(event.src_path) 
+            with open (event.src_path, "r") as fReaali:
+                kulutus,reaaliaikainen,pulssit=fReaali.read().split(";")
+                print(ip,kulutus,reaaliaikainen,pulssit)
+            lahetaBroadCast('{"elementit": [{"elementti": "nahty_'+ip+'", "arvo": "'+aika+'"},{"elementti": "kwh_'+ip+'", "arvo": "'+kulutus+'"}, {"elementti": "reaali_'+ip+'", "arvo": "'+reaaliaikainen+'"}, {"elementti": "pulssit_'+ip+'", "arvo": "'+pulssit+'"}]}')
 
 if __name__ == '__main__':
     os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
