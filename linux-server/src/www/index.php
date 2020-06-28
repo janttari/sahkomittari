@@ -1,4 +1,4 @@
-<!DOCTYPE html> <head> <style>.red {background-color: coral;}</style> <script type="text/javascript" 
+<!DOCTYPE html> <head> <style>.korostus {background-color: Coral;} .alive {background-color: Gainsboro;} </style> <script type="text/javascript" 
 src="js/jquery-3.5.1.min.js"></script> </head> <script>
 
 //var socketUrl = 'ws://'+location.hostname+(location.port ? ':'+location.port: '')+'/p7777'; //    ws://domain:portti/p7777
@@ -35,12 +35,15 @@ ws.onmessage = function(event) {
                 document.getElementById(json.elementit[it].elementti).innerHTML = json.elementit[it].arvo;
                 elem=document.getElementById(json.elementit[it].elementti);
                 if (!( event.data.includes("alive"))){
-                    $(elem).addClass('red').delay(1000).queue(function(next){
-                    $(this).removeClass('red');
+                    vari='korostus';
+                }
+                else{
+                    vari='alive';
+                }
+                    $(elem).addClass(vari).delay(1000).queue(function(next){
+                    $(this).removeClass(vari);
                     next();
                     });
-                }
-                
             }
             else{
                 console.log("elementtiä "+json.elementit[it].elementti+" ei ole!");    
