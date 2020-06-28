@@ -1,2 +1,0 @@
--serverille www-sivu, josta saadaan luotua uusi tietokanta ja siihen uudet asiakas-raspberryn tiedot ja muutettua olemassaolevia
-
