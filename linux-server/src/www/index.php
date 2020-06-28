@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<head>
-<style>.red {background-color: coral;}</style>
-<script type="text/javascript" src="js/jquery-3.5.1.min.js"></script>
-</head>
-<script>
+<!DOCTYPE html> <head> <style>.red {background-color: coral;}</style> <script type="text/javascript" 
+src="js/jquery-3.5.1.min.js"></script> </head> <script>
 
 //var socketUrl = 'ws://'+location.hostname+(location.port ? ':'+location.port: '')+'/p7777'; //    ws://domain:portti/p7777
-var socketUrl = 'ws://localhost:8889';
+//var socketUrl = 'ws://localhost:8889';
+var socketUrl = 'ws://'+location.hostname+":8889";
+
 var ws = new  WebSocket(socketUrl);
 
 function ruudulle(kentta, sanoma) { //tulosta kenttä:arvo
@@ -48,6 +46,7 @@ ws.onmessage = function(event) {
         }
 }
 </script>
+<a href="hallinta.php">hallinta</a><br>
 <table>
 	<tr>
 		<td>
@@ -64,7 +63,7 @@ ws.onmessage = function(event) {
 <?php 
     class MyDB extends SQLite3 {
         function __construct() {
-            $this->open('/yandex/työnalla/sahkomittari/linux-server/src/opt/sahkomittari-server/raspisahkomittari.db');
+            $this->open('/opt/sahkomittari-server/raspisahkomittari.db');
         }
     }
     $db = new MyDB();

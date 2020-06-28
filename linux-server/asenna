@@ -20,11 +20,15 @@ sudo cp -R src/* /
 
 echo "Sammutetaan palvelut..."
 sudo systemctl stop sahkomittari-server
+sudo systemctl stop sahkomittari-ws-selaimille
 echo "Käynnistetään palvelut..."
+
+sleep 3
 sudo systemctl enable sahkomittari-server #palvelin joka vastaanottaa datan raspberryiltä
 sudo systemctl start sahkomittari-server
-sudo systemctl enable sahkomittari-ws-selaimille.service #tämä on websocket palvelija internet-selaimille
-sudo systemctl start sahkomittari-ws-selaimille.service
+sudo systemctl enable sahkomittari-ws-selaimille #tämä on websocket palvelija internet-selaimille
+sudo systemctl start sahkomittari-ws-selaimille
 sudo systemctl daemon-reload
 sudo chmod -R 777 /www
+sudo chmod a+x /opt/sahkomittari-server/sahkomittari-*
 echo "Asennus valmis!"
