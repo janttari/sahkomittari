@@ -37,9 +37,9 @@ päivitys:
 
 
 asentuu /opt/sahkomittari-server/ 
-
-sahkomittari-server.service #vastaanottaa datan raspberryltä
-sahkomittari-ws-selaimille.service #lähettää dataa selaimille, kun /dev/shm/sahkomittari -hakemiston data muuttuu
+ 
+sahkomittari-server.service #vastaanottaa datan raspberryltä 
+sahkomittari-ws-selaimille.service #lähettää dataa selaimille, kun /dev/shm/sahkomittari -hakemiston data muuttuu 
 
 
 tietokanta asiakkaille: 
