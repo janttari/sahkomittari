@@ -15,7 +15,7 @@ asentuu hakemistoon /opt/sahkomittari/
 
 Asetukset tiedostoissa:
 ```
-/opt/sahkomittari/raspisahkomittari.py #esim pulssipinni, pulssia/kwh jne LAITA TÄNNE PALVELIMEN OSOITE!
+/opt/sahkomittari/sahkomittari.ini #esim pulssipinni, pulssia/kwh jne LAITA TÄNNE PALVELIMEN OSOITE!
 ```
 
 Luo systemd-palvelun sahkomittari.service (--> /opt/sahkomittari/raspisahkomittari.py)    
