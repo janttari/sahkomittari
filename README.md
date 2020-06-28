@@ -19,8 +19,7 @@ Asetukset tiedostoissa:
 ```
 
 Luo systemd-palvelun sahkomittari.service (--> /opt/sahkomittari/raspisahkomittari.py)    
-raspisahkomittari.py ottaa yhteyden palvelimeen ja lähettää sille sähkömittarin lukeman pulssin saatuaan.   
-Vastaanottoa voi kokeilla: server-testi  
+raspisahkomittari.py ottaa yhteyden palvelimeen ja lähettää sille sähkömittarin lukeman pulssin saatuaan ja ilman pulssejakin säännöllisin välein alive-viestillä.  
 
 -------
 asennus **LINUX SERVER**:
