@@ -54,5 +54,6 @@ tietokanta kulutuslukemille:
   
   
 TODO:  
--selaimelle tallennetut kulutuslukemat heti kun sivu ladataan. nyt näyttää vain kun mittari-raspilta tulee dataa  
- 
+-sivu josta näkee tallennetut lukemat plus csv-vienti  
+-tietokantojen varmuuskopiointi-lataus selaimella  
+
