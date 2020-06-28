@@ -4,3 +4,9 @@
 /opt/sahkomittari-server/data/kulutus.db #tietokanta kulutuslukemista unix-aika, ip, kwh, pulssit
 ^tee tälle www-sivu joka nyttää täällä olevat datat ja dumppaa ne halutessaan sekä importoi csv
 
+-älä väläytä selaimessa korostusta, jos pelkkä alive
+-lataa selaimeen sivun latauksessa tallennettu viimeisin lukema,
+koska nyt näyttää vain kun dataa tulee
+
+***
+serveri tallentaa kulutus-tietokantaan lukemat tasatunnein
