@@ -46,7 +46,7 @@ ws.onmessage = function(event) {
         }
 }
 </script>
-<a href="hallinta.php">hallinta</a><br>
+<a href="asiakashallinta/">Asiakashallinta</a><br><br>
 <table>
 	<tr>
 		<td>
@@ -63,7 +63,7 @@ ws.onmessage = function(event) {
 <?php 
     class MyDB extends SQLite3 {
         function __construct() {
-            $this->open('/opt/sahkomittari-server/raspisahkomittari.db');
+            $this->open('/opt/sahkomittari-server/data/asiakkaat.db');
         }
     }
     $db = new MyDB();

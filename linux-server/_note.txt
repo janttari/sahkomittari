@@ -1,3 +1,2 @@
-sudo apt -y install nginx  php7.4-cli php7.4-cgi php7.4-fpm fcgiwrap php7.4-sqlite3 sqlite3
-nginx asetukset
-/opt/sahkomittari-server/asiakastiedot_tilat/ chmod niin että php saa lukea ja tallentaa!
+/opt/sahkomittari-server/data/asiakkaat.db #tietokanta asiakkaista id, ip, nimi, numero
+/opt/sahkomittari-server/data/kulutus.db #tietokanta kulutuslukemista ip, kwh, pulssit

@@ -31,4 +31,5 @@ sudo systemctl start sahkomittari-ws-selaimille
 sudo systemctl daemon-reload
 sudo chmod -R 777 /www
 sudo chmod a+x /opt/sahkomittari-server/sahkomittari-*
+sudo chmod -R 777 /opt/sahkomittari-server/data/
 echo "Asennus valmis!"
