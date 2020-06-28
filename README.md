@@ -39,7 +39,7 @@ päivitys:
 asentuu /opt/sahkomittari-server/  
   
  sahkomittari-server.service #vastaanottaa datan raspberryltä  
- reaaliaikainen lukema tallentuu heti /dev/shm/sahkomittari-server/ip  
+ reaaliaikainen lukema tallentuu heti /dev/shm/sahkomittari-server/<ip>  
  kokonaikulutus;reaaliaikainen;pulssit;info  
   
  
