@@ -63,20 +63,22 @@ ws.onmessage = function(event) {
 <br>
 <table border=1><tr><td width="300">nähty</td><td width="100">ip</td><td width="100">numero</td><td width="100">nimi</td><td width="100">kwh</td><td width="100">reaaliaik</td><td width="100">pulssit</td><td width="100">info</td></tr>
 <?php 
-    $db_asiakkaat = new SQLite3('/opt/sahkomittari-server/data/asiakkaat.db');
-    $db_kulutus = new SQLite3('/opt/sahkomittari-server/data/kulutus.db');
-    $sql = "SELECT * from asiakkaat";
-    $ret_asiakkaat = $db_asiakkaat->query($sql);
-    while($row = $ret_asiakkaat->fetchArray(SQLITE3_ASSOC) ) {
-        $sql = "SELECT * from kulutus WHERE IP='".$row['ip']."' ORDER BY aikaleima DESC LIMIT 1";
-        $ret_kulutus = $db_kulutus->query($sql);
-        $row_kulutus = $ret_kulutus->fetchArray(SQLITE3_ASSOC);
-        $kwh=$row_kulutus['kwh'];
-        $pulssit=$row_kulutus['pulssit'];
-        echo "<tr><td id=nahty_".$row['ip'].">---</td></td---><td>". $row['ip'] . "</td><td>". $row['numero'] ."</td><td>". $row['nimi'] ."</td><td id=kwh_".$row['ip'].">".$kwh."</td><td id=reaali_".$row['ip'].">---</td><td id=pulssit_".$row['ip'].">".$pulssit."</td></td><td id=info_".$row['ip'].">REC</td></tr><br>";
+    class MyDB extends SQLite3 {
+        function __construct() {
+            $this->open('/opt/sahkomittari-server/data/asiakkaat.db');
+        }
+    }
+    $db = new MyDB();
+    $sql =<<<EOF
+    SELECT * from asiakkaat;
+    EOF;
+
+    $ret = $db->query($sql);
+    while($row = $ret->fetchArray(SQLITE3_ASSOC) ) {
+        echo "<tr><td id=nahty_".$row['ip'].">---</td></td---><td>". $row['ip'] . "</td><td>". $row['numero'] ."</td><td>". $row['nimi'] ."</td><td id=kwh_".$row['ip'].">---</td><td id=reaali_".$row['ip'].">---</td><td id=pulssit_".$row['ip'].">---</td></td><td id=info_".$row['ip'].">---</td></tr><br>";
     }
    
-    $db_asiakkaat->close();
+    $db->close();
 ?>
 
 </table>
