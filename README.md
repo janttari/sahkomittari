@@ -37,6 +37,7 @@ päivitys:
 
 
 asentuu /opt/sahkomittari-server/  
+mene internet-selaimella http://raspi_server_ip  
   
  sahkomittari-server.service #vastaanottaa datan raspberryltä  
  reaaliaikainen lukema tallentuu heti /dev/shm/sahkomittari-server/xxx.xxx.xxx.xxx  
