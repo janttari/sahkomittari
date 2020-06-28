@@ -1,3 +1,5 @@
+<!-- php sqlite3 esimerkki https://github.com/sinha2773/crud_sqlitedb -->
+
 <?php session_start();
 
 spl_autoload_register('autoloader');
