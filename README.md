@@ -42,12 +42,13 @@ sahkomittari-server.service #vastaanottaa datan raspberryltä
 sahkomittari-ws-selaimille.service #lähettää dataa selaimille, kun /dev/shm/sahkomittari -hakemiston data muuttuu
 
 
-tietokanta asiakkaille:
-/opt/sahkomittari-server/data/asiakkaat.db #muokataan selaimella
-
-tietokanta kulutuslukemille:
-/opt/sahkomittari-server/data/kulutus.db #tänne tallennetaan pysyvät lukemat tasatunnein
-
-
-TODO:
--selaimelle tallennetut kulutuslukemat heti kun sivu ladataan. nyt näyttää vain kun mittari-raspilta tulee dataa
+tietokanta asiakkaille: 
+/opt/sahkomittari-server/data/asiakkaat.db #muokataan selaimella 
+ 
+tietokanta kulutuslukemille: 
+/opt/sahkomittari-server/data/kulutus.db #tänne tallennetaan pysyvät lukemat tasatunnein 
+ 
+ 
+TODO: 
+-selaimelle tallennetut kulutuslukemat heti kun sivu ladataan. nyt näyttää vain kun mittari-raspilta tulee dataa 
+ 
