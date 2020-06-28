@@ -1,6 +1,6 @@
-/opt/sahkomittari-server/data/asiakkaat.db #tietokanta asiakkaista id, ip, nimi, numero
+/opt/sahkomittari-server/data/asiakkaat.db #tietokanta asiakkaista ip, nimi, numero
 ^tee tälle www-sivu, joka dumppaa
 
-/opt/sahkomittari-server/data/kulutus.db #tietokanta kulutuslukemista ip, kwh, pulssit
+/opt/sahkomittari-server/data/kulutus.db #tietokanta kulutuslukemista unix-aika, ip, kwh, pulssit
 ^tee tälle www-sivu joka nyttää täällä olevat datat ja dumppaa ne halutessaan sekä importoi csv
 

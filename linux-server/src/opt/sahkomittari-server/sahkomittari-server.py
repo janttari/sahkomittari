@@ -1,17 +1,17 @@
-#!/usr/bin/env python3
-# sudo pip3 uninstall websocket_server
-# sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
+#!/usr/bin/env python3 
+# sudo pip3 uninstall websocket_server sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
 #
 # Tässä ei ole ws-palvelua selaimelle. tehdään siitä kokonaan oma ohjelma tietoturvan vuoksi! se skripti voi käyttää /dev/shm ja inotify
 #
 
-SHMHAKEMISTO="/dev/shm/sahkomittari" # tänne tallentuu reaaliaikainen kulutustieto www-pavelinta ja muuta käyttöä varten. Ei säily rebootin jälkeen
-TALLENNAPYSYVA="/opt/sahkomittari-server/data" #Tänne kirjoitetaan pysyvät tiedot, jotka säilyy rebootin jälkeenkin.
-
 from websocket_server import WebsocketServer
 from datetime import datetime
 import time, threading, logging, sys, os, json, logging, urllib.parse, sqlite3
-tietokanta=os.getcwd()+"/raspisahkomittari.db" #Tietokanta on samassa hakemistossa kuin tämä skriptikin
+
+
+SHMHAKEMISTO="/dev/shm/sahkomittari-server" # tänne tallentuu reaaliaikainen kulutustieto www-pavelinta ja muuta käyttöä varten. Ei säily rebootin jälkeen
+kulutusTietokanta=os.getcwd()+"/opt/sahkomittari-server/data/kulutus.db"
+
 viimTallennusaika="" #Tähän kirjoitetaan milloin pysyvät tiedostot on viimeksi tallennettu HH
 kwhMuisti={} # {'192.168.4.222': '0.45250'}
 pulssiMuisti={} #ip:pulssit
@@ -22,6 +22,7 @@ logger.addHandler(logging.StreamHandler())
 
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
     pass
+    #print(client)
 
 def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut yhteyden
     pass
@@ -30,6 +31,7 @@ def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut 
     #    mittariRaspit.pop(client)
 
 def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
+    #print(message)
     asiakasIP, asiakasPortti=(client["address"])
     jsmessage=json.loads(message)
     if "konffi" in jsmessage: # asiakas lähettää konffitiedostonsa tänne qEI-KÄYTÖSSÄ
@@ -65,14 +67,20 @@ def kuuntelija(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
 def tallennaPysyvat(): # muuta tää sqllitelle!
     #aika=aika=datetime.now().strftime("%Y%m%d-%H%M%S") #20200614-120002
     aika=str(int(time.time())) #unix-aikaleima
+    conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
+    c = conn.cursor()
+    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip STRING , kwh REAL, pulssit INTEGER)')
     for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan
-        with open (TALLENNAPYSYVA+"/"+asiakasIP, "a") as fTallennaPysyva: #/opt/sahkomittari-server/data/192.168.4.222
-            fTallennaPysyva.write(aika+";"+kwhMuisti[asiakasIP]+";"+pulssiMuisti[asiakasIP]+"\n") #20200614-120002;357
-    print("**TALLENNA")
+        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+')')
+        #with open (TALLENNAPYSYVA+"/"+asiakasIP, "a") as fTallennaPysyva: #/opt/sahkomittari-server/data/192.168.4.222
+        #    fTallennaPysyva.write(aika+";"+kwhMuisti[asiakasIP]+";"+pulssiMuisti[asiakasIP]+"\n") #20200614-120002;357
+    conn.commit()
+    conn.close()
+    #print("**TALLENNA")
 
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
-    os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
-    os.makedirs( TALLENNAPYSYVA, mode=0o777, exist_ok=True )
+    #os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
+    #os.makedirs( TALLENNAPYSYVA, mode=0o777, exist_ok=True )
     t=threading.Thread(target=kuuntelija)
     t.start()
 
@@ -86,10 +94,10 @@ if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
         else:
             if kierros==0:               #jos on ohjelman ensimmäinen suorituskierros, mitään tallennettavaa ei vielä voi olla
                 viimTallennusaika=kello
-                print("eka kierros")
-        if kierros%10==0:
-            aika=datetime.now().strftime("%H:%M:%S")
-            #lahetaSelaimille('{"elementit": [{"elementti": "192.168.4.222_kwh", "arvo": "'+aika+'"},{"elementti": "192.168.4.150_kwh", "arvo": "12.3"}]}')
-            print(kierros)
-            #tallennaPysyvat() #qqq testi
+                #print("eka kierros")
+        #if kierros%10==0:
+        #    aika=datetime.now().strftime("%H:%M:%S")
+        #    #lahetaSelaimille('{"elementit": [{"elementti": "192.168.4.222_kwh", "arvo": "'+aika+'"},{"elementti": "192.168.4.150_kwh", "arvo": "12.3"}]}')
+        #    print(kierros)
+        #    #tallennaPysyvat() #qqq testi
         kierros+=1

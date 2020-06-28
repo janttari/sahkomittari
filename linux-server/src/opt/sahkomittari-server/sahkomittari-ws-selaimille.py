@@ -15,7 +15,7 @@ from watchdog.events import FileSystemEventHandler
 from websocket_server import WebsocketServer
 from datetime import datetime
 
-SHMHAKEMISTO="/dev/shm/sahkomittari"
+SHMHAKEMISTO="/dev/shm/sahkomittari-server"
 
 def getDemo2pulssit():
     global demo2pulssit
