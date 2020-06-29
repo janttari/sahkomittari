@@ -69,7 +69,6 @@ def tallennaPysyvat(): # muuta tää sqllitelle!
     aika=str(int(time.time())) #unix-aikaleima
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip STRING , kwh REAL, pulssit INTEGER)')
     for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan
         c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+')')
         #with open (TALLENNAPYSYVA+"/"+asiakasIP, "a") as fTallennaPysyva: #/opt/sahkomittari-server/data/192.168.4.222
@@ -79,6 +78,11 @@ def tallennaPysyvat(): # muuta tää sqllitelle!
     #print("**TALLENNA")
 
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
+    conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
+    c = conn.cursor()
+    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER)')
+    conn.commit()
+    conn.close()
     #os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
     #os.makedirs( TALLENNAPYSYVA, mode=0o777, exist_ok=True )
     t=threading.Thread(target=kuuntelija)

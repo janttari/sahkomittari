@@ -15,7 +15,7 @@ class Db {
 
 
 	public function createStudentTable(){
-		return $this->db->exec('CREATE TABLE IF NOT EXISTS asiakkaat (ip STRING, nimi STRING, numero STRING)');
+		return $this->db->exec('CREATE TABLE IF NOT EXISTS asiakkaat (ip TEXT, nimi TEXT, numero TEXT)');
 	}
 
 	public function dropStudentTable(){

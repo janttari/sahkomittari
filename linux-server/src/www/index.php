@@ -21,7 +21,6 @@ ws.onclose = function() {
 		console.log("reconn");
         location.reload();
     }, 5000);
-    
 };
 
 ws.onmessage = function(event) {
