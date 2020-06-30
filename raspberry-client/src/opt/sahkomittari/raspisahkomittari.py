@@ -30,8 +30,6 @@ GPIO.setup(PULSSIPINNI, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #käytetään sisä
 
 def luePinni(child_conn): #Lukee GPIO-pinniltä pulsseja. Tämä käynnistetään itsenäisenä prosessina
     global PULSSIPINNI
-    GPIO.setmode(GPIO.BCM) #https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/
-    GPIO.setup(PULSSIPINNI, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #käytetään sisäistä alasvetoa
     while True:
         GPIO.wait_for_edge(PULSSIPINNI, GPIO.RISING) #odotetaan nouseva reuna
         child_conn.send(1) #Lähetetään että on saatu pulssi
