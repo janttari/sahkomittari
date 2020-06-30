@@ -20,7 +20,7 @@ edLahetysAika=0 #Edellisen kerran lähetetty palvelimelle dataa aikaleima
 edPulssi=0 #Edellisen kerran saadun pulssin aikaleima
 tallennettuPulssi=0 #Viimeisin tiedostoon tallennettu pulssilukema, ettei turhaan kirjoitella jos se ei ole muuttunut
 viimLahetysaika=0 #websocketille on viimeksi lähetetty-aikaleima
-viimLahetettyPulssi=-1 #viimeksi websocketille lähetetty pulssimäärä
+viimLahetettyPulssi=0 #viimeksi websocketille lähetetty pulssimäärä
 kwh="" #kokonaiskulutus kwh
 reaaliaikainen="" #reaaliaikainen kulutus tällä hetkellä
 aja=True #liipaise tämä Falseksi niin lopetetaan
@@ -36,18 +36,12 @@ def luePinni(child_conn): #Lukee GPIO-pinniltä pulsseja. Tämä käynnistetää
         GPIO.wait_for_edge(PULSSIPINNI, GPIO.FALLING) #odotetaan laskeva reuna
 
 def vastaanotaImpulssi(parent_conn): #Tämä säie vastaanottaa aina luvun 1 kun luePinni on lukenut pulssin
-    global pulssiLaskuri, aja
+    global pulssiLaskuri, aja, edPulssi
     while aja:
         data=parent_conn.recv()
         if data != "stop": #Ohjelman alasajoon liityvä snoma
             pulssiLaskuri+=1
-            laskeKulutus()
-
-def laskeKulutus():
-    global kwh, reaaliaikainen, edPulssi
-    ero=time.time()-edPulssi #edellisen pulssin ja nykyisen pulssin välillä on kulunut n sekuntia
-    edPulssi=time.time()
-    kwh="{:.5f}".format(pulssiLaskuri*yks/1000) #Yhteensä kulutusta kertynyt kW
+            edPulssi=time.time()
 
 def reconnect(): #Uudelleenyhdistää katkenneen yhteyden sulkemalla wsasiakas-threadin ja avaamalla sen uudelleen
     global threadWsAsiakas
@@ -71,7 +65,8 @@ def on_close(ws): #Tämä tapahtuu kun ws yhteys on katkennut
     reconnect() #Yritetään avata yhteys uudelleen
 
 def lahetaLukema(): #Tämä säie lähettää websocketille tiedot
-    global aja, pulssiLaskuri, viimLahetettyPulssi, maxLahetysTiheys, maxAliveTiheys, viimLahetysaika, kwh, reaaliaikainen
+    global aja, pulssiLaskuri, viimLahetettyPulssi, maxLahetysTiheys, maxAliveTiheys, viimLahetysaika, kwh, reaaliaikainen, edPulssi
+    time.sleep(2) #ettei eka viesti lähde ennen kuin socket auki
     while aja:
         if pulssiLaskuri!= viimLahetettyPulssi and  time.time()-viimLahetysaika > maxLahetysTiheys: #pulssien määrä on muuttunut
             info = "-"
@@ -82,7 +77,8 @@ def lahetaLukema(): #Tämä säie lähettää websocketille tiedot
             viimLahetysaika=time.time()
         if info != "": #Jos on jotain lähetettävää...
             ero=time.time()-edPulssi
-            reaaliaikainen="{:.5f}".format(1000/yks/ero/1000) #kulutusta on tällä hetkellä kW (Lasketaan tässä kun tämähän laskee alive-viesteissäkin vielä)
+            kwh="{:.5f}".format(pulssiLaskuri*yks/1000) #Yhteensä kulutusta kertynyt kW
+            reaaliaikainen="{:.5f}".format(1000/yks/ero/1000) #kulutusta on tällä hetkellä kW
             rivi='{"kwh": "'+kwh+'", "pulssit": "'+str(pulssiLaskuri)+'", "reaaliaikainen": "'+reaaliaikainen+'", "info": "'+info+'"}'
             lahetaWs(rivi)
             info=""
@@ -95,7 +91,7 @@ def lahetaWs(sanoma): #Lähetä sanoma serverille päin
             ws.send(sanoma)
         except: #Jos lähetys ei onnistu...
             print("!!! Virhe viestin lähetyksessä!")
-            reconnect()#Pyydetään avaamaan ws uudelleen
+            reconnect() #Pyydetään avaamaan ws uudelleen
 
 def wsasiakas(): #Varsinainen ws-client. Suorita tähä threadina!
     global ws, PALVELIN
@@ -124,10 +120,10 @@ if __name__ == "__main__":
     process = Process(target=luePinni, args=(parent_conn,)) #Lukee pinnin tilan prosessi
     process.start()
     kierros=0
+    time.sleep(2) #ettei lähetä ennen kuin soketti auki
     if os.path.isfile(pulssiPysyva): #Jos on olemassa tallennettu pulssilukema
         with open(pulssiPysyva, "r") as pulssiTiedosto: #Luetaan pulssilukema tiedostosta
             pulssiLaskuri=int(pulssiTiedosto.read())
-            laskeKulutus()
     try:
         while aja: #Suoritetaan tätä looppia ja tehdään täällä säännöllisesti tarvittavat toiminnot
             if kierros % tallennaPulssiSek == 0 and tallennettuPulssi != pulssiLaskuri and kierros !=0:
