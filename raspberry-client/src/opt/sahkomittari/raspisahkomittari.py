@@ -48,7 +48,6 @@ def laskeKulutus():
     ero=time.time()-edPulssi #edellisen pulssin ja nykyisen pulssin välillä on kulunut n sekuntia
     edPulssi=time.time()
     kwh="{:.5f}".format(pulssiLaskuri*yks/1000) #Yhteensä kulutusta kertynyt kW
-    reaaliaikainen="{:.5f}".format(1000/yks/ero/1000) #kulutusta on tällä hetkellä kW
 
 def reconnect(): #Uudelleenyhdistää katkenneen yhteyden sulkemalla wsasiakas-threadin ja avaamalla sen uudelleen
     global threadWsAsiakas
@@ -82,6 +81,8 @@ def lahetaLukema(): #Tämä säie lähettää websocketille tiedot
             info = "alive"
             viimLahetysaika=time.time()
         if info != "": #Jos on jotain lähetettävää...
+            ero=time.time()-edPulssi
+            reaaliaikainen="{:.5f}".format(1000/yks/ero/1000) #kulutusta on tällä hetkellä kW (Lasketaan tässä kun tämähän laskee alive-viesteissäkin vielä)
             rivi='{"kwh": "'+kwh+'", "pulssit": "'+str(pulssiLaskuri)+'", "reaaliaikainen": "'+reaaliaikainen+'", "info": "'+info+'"}'
             lahetaWs(rivi)
             info=""
