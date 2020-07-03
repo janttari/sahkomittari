@@ -44,6 +44,7 @@ def vastaanotaImpulssi(parent_conn): #Tämä säie vastaanottaa aina luvun 1 kun
     global pulssiLaskuri, aja, edPulssi
     while aja:
         data=parent_conn.recv()
+        #lokita("saatu pulssi")
         if data != "stop": #Ohjelman alasajoon liityvä snoma
             pulssiLaskuri+=1
             edPulssi=time.time()
@@ -57,7 +58,7 @@ def reconnect(): #Uudelleenyhdistää katkenneen yhteyden sulkemalla wsasiakas-t
     threadWsAsiakas.start()
 
 def on_open(ws): #Tämä suoritetaan kun ws-yhteyn on avattu
-    pass #Ei tehdä nyt mitään
+    lokita("ws avattu")
 
 def on_message(ws, message): #Tämä suoritetaan kun serveri lähettää meillepäin ws dataa
     pass
