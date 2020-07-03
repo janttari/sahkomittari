@@ -20,6 +20,11 @@ logger = logging.getLogger('websocket_server.WebsocketServer')
 logger.setLevel(logging.CRITICAL)
 logger.addHandler(logging.StreamHandler())
 
+def lokita(rivi):
+    kello=time.strftime("%y%m%d-%H%M%S")
+    print(kello, rivi)
+    sys.stdout.flush()
+
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
     pass
     #print(client)
@@ -64,7 +69,8 @@ def kuuntelija(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
     server.set_fn_message_received(message_received)
     server.run_forever()
 
-def tallennaPysyvat(): # muuta tää sqllitelle!
+def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tiedostoon
+    lokita("tallennaPysyvat")
     #aika=aika=datetime.now().strftime("%Y%m%d-%H%M%S") #20200614-120002
     aika=str(int(time.time())) #unix-aikaleima
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
@@ -98,7 +104,7 @@ if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
         else:
             if kierros==0:               #jos on ohjelman ensimmäinen suorituskierros, mitään tallennettavaa ei vielä voi olla
                 viimTallennusaika=kello
-                #print("eka kierros")
+                lokita("eka kierros")
         #if kierros%10==0:
         #    aika=datetime.now().strftime("%H:%M:%S")
         #    #lahetaSelaimille('{"elementit": [{"elementti": "192.168.4.222_kwh", "arvo": "'+aika+'"},{"elementti": "192.168.4.150_kwh", "arvo": "12.3"}]}')

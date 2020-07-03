@@ -5,8 +5,8 @@ After=network.target
 [Service]
 ExecStart=/opt/sahkomittari-server/sahkomittari-server.py
 WorkingDirecty=/tmp
-StandardOutput=inherit
-StandardError=inherit
+StandardOutput=file:/var/log/sahkomittari-server-std.log
+StandardError=file:/var/log/sahkomittari-server-err.log
 Restart=always
 User=root
 

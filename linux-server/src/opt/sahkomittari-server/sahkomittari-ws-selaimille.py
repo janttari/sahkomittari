@@ -7,7 +7,7 @@
 #
 
 
-import time, threading, os, logging
+import time, threading, os, logging, sys
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from websocket_server import WebsocketServer
@@ -15,18 +15,23 @@ from datetime import datetime
 
 SHMHAKEMISTO="/dev/shm/sahkomittari-server"
 
+def lokita(rivi):
+    kello=time.strftime("%y%m%d-%H%M%S")
+    print(kello, rivi)
+    sys.stdout.flush()
+
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
-    print("liitt",client)
-    
+    print("liittyi " + str(client))
+
 def client_left(client, server):    #selain katkaissut yhteyden.
-    print("lahti",client)
-    
+    print("lahti " + str(client))
+
 def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
-    print("msg",client,message)
+    print("msg_selaimelta " + str(client)+" "+str(message))
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
-    server.send_message_to_all(viesti) 
-    
+    server.send_message_to_all(viesti)
+
 def wsSelaimille(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
     global server
     server = WebsocketServer(8889, host='0.0.0.0', loglevel=logging.ERROR )
@@ -34,10 +39,8 @@ def wsSelaimille(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
     server.set_fn_client_left(client_left)
     server.set_fn_message_received(message_received)
     server.run_forever()
-        
-        
-def laheta(mita):
-    print("**LAH", mita)
+
+
 class Watcher: #Luokka valvoo muuttuneita tiedostoja
     DIRECTORY_TO_WATCH = SHMHAKEMISTO
 
@@ -63,7 +66,7 @@ class Handler(FileSystemEventHandler): #Kun tiedostot SHM-hakemistossa muuttunee
         if event.is_directory:
             return None
         elif event.event_type == 'modified':
-            print("Received modified event - %s." % event.src_path)
+            lokita("Received modified event - %s." % event.src_path)
             aika=datetime.now().strftime("%H:%M:%S")
             ip=os.path.basename(event.src_path) 
             with open (event.src_path, "r") as fReaali:
@@ -77,11 +80,11 @@ if __name__ == '__main__':
     threadWatchdogfiles.start()
     threadWsSelaimille=threading.Thread(target=wsSelaimille)
     threadWsSelaimille.start()
-    
+
     while True:
         print("main")
         time.sleep(3)
-        aika=datetime.now().strftime("%H:%M:%S")
+        #aika=datetime.now().strftime("%H:%M:%S")
         #demo1pulssit+=1
         #lahetaBroadCast('{"elementit": [{"elementti": "nahty_192.168.4.222", "arvo": "'+aika+'"},{"elementti": "kwh_192.168.4.222", "arvo": "'+str(demo1pulssit*1.25/1000)+'"}, {"elementti": "pulssit_192.168.4.222", "arvo": "'+str(demo1pulssit)+'"}]}')
         time.sleep(3)

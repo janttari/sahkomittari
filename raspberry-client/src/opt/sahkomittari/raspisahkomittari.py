@@ -28,6 +28,11 @@ aja=True #liipaise tämä Falseksi niin lopetetaan
 GPIO.setmode(GPIO.BCM) #https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/
 GPIO.setup(PULSSIPINNI, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #käytetään sisäistä alasvetoa
 
+def lokita(rivi):
+    kello=time.strftime("%y%m%d-%H%M%S")
+    print(kello, rivi)
+    sys.stdout.flush()
+
 def luePinni(child_conn): #Lukee GPIO-pinniltä pulsseja. Tämä käynnistetään itsenäisenä prosessina
     global PULSSIPINNI
     while True:
@@ -47,7 +52,7 @@ def reconnect(): #Uudelleenyhdistää katkenneen yhteyden sulkemalla wsasiakas-t
     global threadWsAsiakas
     threadWsAsiakas.join()
     time.sleep(1)
-    print("***reconnect")
+    lokita("***reconnect")
     threadWsAsiakas=threading.Thread(target=wsasiakas)
     threadWsAsiakas.start()
 
@@ -58,10 +63,10 @@ def on_message(ws, message): #Tämä suoritetaan kun serveri lähettää meillep
     pass
 
 def on_error(ws, error): #ws virhe
-    print("!!!",error)
+    lokita("wserror "+str(error))
 
 def on_close(ws): #Tämä tapahtuu kun ws yhteys on katkennut
-    print("*** closed")
+    lokita("ws katkennut")
     reconnect() #Yritetään avata yhteys uudelleen
 
 def lahetaLukema(): #Tämä säie lähettää websocketille tiedot
@@ -90,7 +95,7 @@ def lahetaWs(sanoma): #Lähetä sanoma serverille päin
         try:
             ws.send(sanoma)
         except: #Jos lähetys ei onnistu...
-            print("!!! Virhe viestin lähetyksessä!")
+            lokita("ws Virhe viestin lähetyksessä!")
             reconnect() #Pyydetään avaamaan ws uudelleen
 
 def wsasiakas(): #Varsinainen ws-client. Suorita tähä threadina!
@@ -104,7 +109,7 @@ def wsasiakas(): #Varsinainen ws-client. Suorita tähä threadina!
     ws.run_forever()
 
 def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
-    print("* tallenapulssi")
+    lokita("tallenapulssi pysyvään tiedostoon")
     tallennettuPulssi=pulssiLaskuri
     with open(pulssiPysyva, "w") as fpulssiTallenna: #tallennetaan pulssien määrä pysyväksi
         fpulssiTallenna.write(str(pulssiLaskuri))
@@ -131,7 +136,7 @@ if __name__ == "__main__":
             time.sleep(1)
             kierros+=1
     except KeyboardInterrupt: #Testikäytössä ohjelma on hankala sammuttaa, joudutaan vähän kikkailemaan
-        print("LOPETETAAN")
+        lokita("LOPETETAAN")
         tallennaPulssi()
         aja=False
         ws.close()
@@ -141,7 +146,7 @@ if __name__ == "__main__":
         lahettelija.join()
         process.terminate()
         GPIO.cleanup()
-        print("LOPETETTU")
+        lokita("LOPETETTU")
 
 
 
