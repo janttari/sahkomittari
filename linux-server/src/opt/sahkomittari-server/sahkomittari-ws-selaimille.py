@@ -82,8 +82,6 @@ if __name__ == '__main__':
     threadWsSelaimille.start()
 
     while True:
-        print("main")
-        time.sleep(3)
         #aika=datetime.now().strftime("%H:%M:%S")
         #demo1pulssit+=1
         #lahetaBroadCast('{"elementit": [{"elementti": "nahty_192.168.4.222", "arvo": "'+aika+'"},{"elementti": "kwh_192.168.4.222", "arvo": "'+str(demo1pulssit*1.25/1000)+'"}, {"elementti": "pulssit_192.168.4.222", "arvo": "'+str(demo1pulssit)+'"}]}')
