@@ -5,7 +5,6 @@ if [ -f "/opt/sahkomittari/sahkomittari.ini" ]; then
     echo "Tiedosto /opt/sahkomittari/sahkomittari.ini on jo olemassa. Otetaan se talteen!"
     sudo cp /opt/sahkomittari/sahkomittari.ini /tmp/sahkomittari.ini
 fi
-
 echo "Tarkistetaan ohjelmistopakettien riippuvuudet..."
 
 echo python3-pip
@@ -41,7 +40,7 @@ sudo systemctl enable sahkomittari
 sudo systemctl start sahkomittari
 sudo systemctl daemon-reload
 
-if [ -f "tmp/sahkomittari.ini" ]; then
+if [ -f "/tmp/sahkomittari.ini" ]; then
     echo "Palautetaan tiedosto /opt/sahkomittari/sahkomittari.ini!"
     sudo mv /tmp/sahkomittari.ini /opt/sahkomittari/sahkomittari.ini
 fi
