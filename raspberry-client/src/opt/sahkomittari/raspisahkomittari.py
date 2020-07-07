@@ -111,7 +111,7 @@ def vastaanotaImpulssi(data): #Tämä kutsutaan kun pulssien saatu
     wsAsiakas.lahetaWs(rivi)
 
 def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
-    lokita("tallenapulssi pysyvään tiedostoon")
+    lokita("tallenapulssi pysyvään tiedostoon. lukema on nyt:"+str(mittari.getPulssilukema()))
     with open(config['yleiset']['pulssipysyva'], "w") as fpulssiTallenna: #tallennetaan pulssien määrä pysyväksi
         fpulssiTallenna.write(str(mittari.getPulssilukema()))
                 
