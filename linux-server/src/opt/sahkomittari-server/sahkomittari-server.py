@@ -76,9 +76,14 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
     for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan
-        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+')')
-        #with open (TALLENNAPYSYVA+"/"+asiakasIP, "a") as fTallennaPysyva: #/opt/sahkomittari-server/data/192.168.4.222
-        #    fTallennaPysyva.write(aika+";"+kwhMuisti[asiakasIP]+";"+pulssiMuisti[asiakasIP]+"\n") #20200614-120002;357
+        kys=c.execute('SELECT kwh FROM kulutus WHERE IP="'+asiakasIP+'" ORDER BY aikaleima DESC LIMIT 1') #lasketaan ensin tunnin aikana tapahtunut kulutus vertaamalla nykyistä viimeksi tietokantaan tallennettuun lukemaan
+        edtunti=None
+        for i in kys:
+            edtunti=str(i[0])
+        if edtunti is None: #tietokannassa ei vielä ole kulutustietoa...
+            edtunti=float(kwhMuisti[asiakasIP]) #...joten kaikki kulutus on tälle tunnille
+        tuntikohtainen=str(float(kwhMuisti[asiakasIP])-float(edtunti))
+        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+')')
     conn.commit()
     conn.close()
     #print("**TALLENNA")
@@ -86,7 +91,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER)')
+    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL)')
     conn.commit()
     conn.close()
     #os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
