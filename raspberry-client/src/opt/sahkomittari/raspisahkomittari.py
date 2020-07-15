@@ -53,7 +53,9 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
                 tmpPulssit=int(self.pulssilaskuri)
                 tmpKwh="{:.5f}".format(tmpPulssit*1000/self.imp/1000) #kokonaiskulutus kwh
                 tmpReaaliaikainen="{:.5f}".format(((1000/self.imp*3600)/self.aikaaEdPulssista)/1000) #kulutusta on tällä hetkellä kW
-                self.callback((tmpPulssit, tmpKwh, tmpReaaliaikainen, tmpInfo)) #tuple (int pulssimäärä, str kokonaiskulutus, str reaaliaik, str info)            
+                lampo=-127.0
+                kosteus=-127.0
+                self.callback((tmpPulssit, tmpKwh, tmpReaaliaikainen, tmpInfo, lampo, kosteus)) #tuple (int pulssimäärä, str kokonaiskulutus, str reaaliaik, str info)            
             time.sleep(0.05)
             
     def setPulssilukema(self, lukema): #Voidaan asettaa pulssien määrä
@@ -106,15 +108,15 @@ class WsAsiakas(): #------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------
 
 def vastaanotaImpulssi(data): #Tämä kutsutaan kun pulssien saatu
-    pulssimaara, kwh, reaaliaik, info = data
-    rivi='{"kwh": "'+kwh+'", "pulssit": "'+str(pulssimaara)+'", "reaaliaikainen": "'+reaaliaik+'", "info": "'+info+'"}'
+    pulssimaara, kwh, reaaliaik, info, lampo, kosteus = data
+    rivi='{"kwh": "'+kwh+'", "pulssit": "'+str(pulssimaara)+'", "reaaliaikainen": "'+reaaliaik+'", "info": "'+info+'", "lampo": "'+str(lampo)+'", "kosteus": "'+str(kosteus)+'"}'
     wsAsiakas.lahetaWs(rivi)
 
 def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
     lokita("tallenapulssi pysyvään tiedostoon. lukema on nyt:"+str(mittari.getPulssilukema()))
     with open(config['yleiset']['pulssipysyva'], "w") as fpulssiTallenna: #tallennetaan pulssien määrä pysyväksi
         fpulssiTallenna.write(str(mittari.getPulssilukema()))
-                
+
 if __name__ == "__main__": #----------------------------------------------------------------------------------------------------------
     wsAsiakas=WsAsiakas()
     viimtallennettuPulssiAika=time.time() #aika jolloin pulssi on viimeksi tallennettu tiedostoon

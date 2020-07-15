@@ -70,9 +70,9 @@ class Handler(FileSystemEventHandler): #Kun tiedostot SHM-hakemistossa muuttunee
             aika=datetime.now().strftime("%H:%M:%S")
             ip=os.path.basename(event.src_path) 
             with open (event.src_path, "r") as fReaali:
-                kulutus, reaaliaikainen, pulssit, info=fReaali.read().split(";")
+                kulutus, reaaliaikainen, pulssit, info, lampo, kosteus=fReaali.read().split(";")
                 #print(ip,kulutus,reaaliaikainen,pulssit)
-            lahetaBroadCast('{"elementit": [{"elementti": "nahty_'+ip+'", "arvo": "'+aika+'"}, {"elementti": "kwh_'+ip+'", "arvo": "'+kulutus+'"}, {"elementti": "reaali_'+ip+'", "arvo": "'+reaaliaikainen+'"}, {"elementti": "pulssit_'+ip+'", "arvo": "'+pulssit+'"}, {"elementti": "info_'+ip+'", "arvo" : "'+info+'"} ]}')
+            lahetaBroadCast('{"elementit": [{"elementti": "nahty_'+ip+'", "arvo": "'+aika+'"}, {"elementti": "kwh_'+ip+'", "arvo": "'+kulutus+'"}, {"elementti": "reaali_'+ip+'", "arvo": "'+reaaliaikainen+'"}, {"elementti": "pulssit_'+ip+'", "arvo": "'+pulssit+'"}, {"elementti": "info_'+ip+'", "arvo" : "'+info+'"}, {"elementti": "lampo_'+ip+'", "arvo" : "'+lampo+'"}, {"elementti": "kosteus_'+ip+'", "arvo" : "'+kosteus+'"} ]}')
 
 if __name__ == '__main__':
     os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)

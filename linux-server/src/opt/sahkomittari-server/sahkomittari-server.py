@@ -15,6 +15,8 @@ kulutusTietokanta=os.getcwd()+"/opt/sahkomittari-server/data/kulutus.db"
 viimTallennusaika="" #Tähän kirjoitetaan milloin pysyvät tiedostot on viimeksi tallennettu HH
 kwhMuisti={} # {'192.168.4.222': '0.45250'}
 pulssiMuisti={} #ip:pulssit
+lampoMuisti={} #ip:lämpötila
+kosteusMuisti={} #ip:kosteus
 mittariRaspit={} #Tässä liittyneenä olevat mittari-raspit ip:ws_client
 logger = logging.getLogger('websocket_server.WebsocketServer')
 logger.setLevel(logging.CRITICAL)
@@ -47,10 +49,14 @@ def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
         pulssit=jsmessage.get("pulssit")
         reaaliaikainen=jsmessage.get("reaaliaikainen")
         info=jsmessage.get("info","-")
+        lampo=jsmessage.get("lampo","-")
+        kosteus=jsmessage.get("kosteus","-")
         kwhMuisti[asiakasIP]=kwh
         pulssiMuisti[asiakasIP]=pulssit
+        lampoMuisti[asiakasIP]=lampo
+        kosteusMuisti[asiakasIP]=kosteus
         with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
-            fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit+";"+info) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
+            fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit+";"+info+";"+lampo+";"+kosteus) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
     server.send_message_to_all(viesti)
@@ -71,8 +77,8 @@ def kuuntelija(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
 
 def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tiedostoon
     lokita("tallennaPysyvat")
-    #aika=aika=datetime.now().strftime("%Y%m%d-%H%M%S") #20200614-120002
     aika=str(int(time.time())) #unix-aikaleima
+    ulkolampo=-127.0 #haetaan tää lopullisessa versiossa tässä kohtaa
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
     for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan
@@ -83,7 +89,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
         if edtunti is None: #tietokannassa ei vielä ole kulutustietoa...
             edtunti=float(kwhMuisti[asiakasIP]) #...joten kaikki kulutus on tälle tunnille
         tuntikohtainen=str(float(kwhMuisti[asiakasIP])-float(edtunti))
-        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+')')
+        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+', '+lampoMuisti[asiakasIP]+', '+kosteusMuisti[asiakasIP]+', '+str(ulkolampo)+')')
     conn.commit()
     conn.close()
     #print("**TALLENNA")
@@ -91,7 +97,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL)')
+    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL)')
     conn.commit()
     conn.close()
     #os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)

@@ -40,7 +40,7 @@ mene internet-selaimella http://raspi_server_ip
   
  sahkomittari-server.service (--> /opt/sahkomittari-server/sahkomittari-server.py) #vastaanottaa datan raspberryltä  
  reaaliaikainen lukema tallentuu heti /dev/shm/sahkomittari-server/xxx.xxx.xxx.xxx  
- kokonaikulutus;reaaliaikainen;pulssit;info  
+ kokonaikulutus;reaaliaikainen;pulssit;info;lämpötila;kosteus  
   
  
 sahkomittari-ws-selaimille.service (--> /opt/sahkomittari-server/sahkomittari-ws-selaimille.py) #lähettää dataa selaimille, kun /dev/shm/sahkomittari -hakemiston data muuttuu  
