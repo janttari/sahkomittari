@@ -79,6 +79,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
     lokita("tallennaPysyvat")
     aika=str(int(time.time())) #unix-aikaleima
     ulkolampo=-127.0 #haetaan tää lopullisessa versiossa tässä kohtaa
+    ulkokosteus=-127.0
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
     for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan
@@ -89,7 +90,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
         if edtunti is None: #tietokannassa ei vielä ole kulutustietoa...
             edtunti=float(kwhMuisti[asiakasIP]) #...joten kaikki kulutus on tälle tunnille
         tuntikohtainen=str(float(kwhMuisti[asiakasIP])-float(edtunti))
-        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+', '+lampoMuisti[asiakasIP]+', '+kosteusMuisti[asiakasIP]+', '+str(ulkolampo)+')')
+        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo, ulkokosteus) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+', '+lampoMuisti[asiakasIP]+', '+kosteusMuisti[asiakasIP]+', '+str(ulkolampo)+', '+str(ulkokosteus)+')')
     conn.commit()
     conn.close()
     #print("**TALLENNA")
@@ -97,7 +98,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL)')
+    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL, ulkokosteus REAL)')
     conn.commit()
     conn.close()
     #os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
