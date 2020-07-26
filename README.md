@@ -18,6 +18,13 @@ Asetukset tiedostoissa:
 /opt/sahkomittari/sahkomittari.ini #esim pulssipinni, pulssia/kwh jne LAITA TÄNNE PALVELIMEN OSOITE!
 ```
 
+Jos lämpömittari käytössä, lisää rivit:
+```
+lampopinni=4 #lämpöanturi tässä pinnissä                                                                                                                                                                         
+lampomittaavali=600 #mittaa lämpötila joka nn sekunti   
+```
+
+
 Luo systemd-palvelun sahkomittari.service (--> /opt/sahkomittari/raspisahkomittari.py)    
 raspisahkomittari.py ottaa yhteyden palvelimeen ja lähettää sille sähkömittarin lukeman pulssin saatuaan ja ilman pulssejakin säännöllisin välein alive-viestillä.  
 
