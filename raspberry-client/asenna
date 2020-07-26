@@ -29,6 +29,11 @@ if [[ -z $(pip3 list|grep "RPi.GPIO") ]]; then
     sudo pip3 install RPi.GPIO
 fi
 
+echo Adafruit-DHT
+if [[ -z $(pip3 list|grep "Adafruit-DHT") ]]; then
+    echo Asennetaan Adafruit-DHT
+    sudo pip3 install Adafruit_DHT
+fi
 
 echo Kopioidaan tiedostot...
 sudo cp -R src/* /

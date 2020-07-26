@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import time, os, sys, socket, threading, websocket, configparser
+import time, os, sys, socket, threading, websocket, configparser, Adafruit_DHT
 import RPi.GPIO as GPIO
 #----------------------------------------------------------------
 skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin fyysinen sijainti configia varten
@@ -15,7 +15,16 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
     def __init__(self, callback):
         '''self, pulssipinni, viestikanava, pulssiValue, maxLahetysTiheys, maxAliveTiheys, imp_per_kwh'''
         self.callback=callback
+        self.lampo=-127.0
+        self.kosteus=-127.0
         self.pulssipinni=int(config['yleiset']['pulssipinni'])
+        if config.has_option('yleiset', 'lampopinni'): #Jos lämpömittarin pinni määritelty
+            self.lampopinni=int(config['yleiset']['lampopinni'])
+            self.lampomittaavali=int(config['yleiset']['lampomittaavali'])
+            self.DHT_SENSOR = Adafruit_DHT.DHT22
+        else:
+            self.lampopinni=None
+        self.lampoMitattu=0 # aikaleima viimeisestä lämpömittauksesta
         self.pulssilaskuri = -1 #lasketaan tähän pulssit
         self.maxLahetysTiheys=float(config['yleiset']['maxtiheys'])
         self.maxAliveTiheys=float(config['yleiset']['alive'])
@@ -28,7 +37,6 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
         self.pinninLukija.start()
         self.valvoja=threading.Thread(target=self.valvoPulsseja)
         self.valvoja.start()
-
     def luePinni(self): #Varsinainen pinniä lukeva osa
         GPIO.setmode(GPIO.BCM) #https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/
         GPIO.setup(self.pulssipinni, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #käytetään sisäistä alasvetoa
@@ -38,7 +46,7 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
             self.pulssilaskuri+=1
             self.viimPulssiAika=time.time()
             GPIO.wait_for_edge(self.pulssipinni, GPIO.FALLING) #odotetaan laskeva reuna
-    
+
     def valvoPulsseja(self): #Tämä seuraa saapuvia pulsseja ja milloin pitää lähettää alive
         time.sleep(3) #Odotetaan hetki kunnes tallennetut lukemat on saatu varmasti
         while True:
@@ -53,15 +61,19 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
                 tmpPulssit=int(self.pulssilaskuri)
                 tmpKwh="{:.5f}".format(tmpPulssit*1000/self.imp/1000) #kokonaiskulutus kwh
                 tmpReaaliaikainen="{:.5f}".format(((1000/self.imp*3600)/self.aikaaEdPulssista)/1000) #kulutusta on tällä hetkellä kW
-                lampo=-127.0
-                kosteus=-127.0
-                self.callback((tmpPulssit, tmpKwh, tmpReaaliaikainen, tmpInfo, lampo, kosteus)) #tuple (int pulssimäärä, str kokonaiskulutus, str reaaliaik, str info)            
+                if self.lampopinni is not None: #jos lämpötilan mittaus käytössä, luetaan se tässä vaiheessa koska se blokkaa. !!TODO
+                    if time.time()-self.lampoMitattu > self.lampomittaavali: #viimeisestä lämpömittauksesta aikaa tarpeeksi
+                        self.lampoMitattu=time.time()
+                        kosteus, lampo = Adafruit_DHT.read_retry(self.DHT_SENSOR, self.lampopinni) #varsinainen lämmön mittaus
+                        self.kosteus=round(kosteus,1) #ylimääräiset desimaalit pois
+                        self.lampo=round(lampo,1)
+                self.callback((tmpPulssit, tmpKwh, tmpReaaliaikainen, tmpInfo, self.lampo, self.kosteus)) #tuple (int pulssimäärä, str kokonaiskulutus, str reaaliaik, str info)
             time.sleep(0.05)
-            
+
     def setPulssilukema(self, lukema): #Voidaan asettaa pulssien määrä
         self.pulssilaskuri=lukema
         lokita("asetetaan mittarilukema: "+str(self.pulssilaskuri))
-        
+
     def getPulssilukema(self):
         return self.pulssilaskuri
 
