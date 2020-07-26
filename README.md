@@ -18,7 +18,7 @@ Asetukset tiedostoissa:
 /opt/sahkomittari/sahkomittari.ini #esim pulssipinni, pulssia/kwh jne LAITA TÄNNE PALVELIMEN OSOITE!
 ```
 
-Jos lämpömittari käytössä, lisää rivit:
+Jos lämpömittari DHT-22 käytössä, lisää rivit:
 ```
 lampopinni=4 #lämpöanturi tässä pinnissä                                                                                                                                                                         
 lampomittaavali=600 #mittaa lämpötila joka nn sekunti   
