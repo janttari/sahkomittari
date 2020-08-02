@@ -7,7 +7,7 @@
 from websocket_server import WebsocketServer
 from datetime import datetime
 import time, threading, logging, sys, os, json, logging, urllib.parse, sqlite3
-
+DEBUG=True
 
 SHMHAKEMISTO="/dev/shm/sahkomittari-server" # tänne tallentuu reaaliaikainen kulutustieto www-pavelinta ja muuta käyttöä varten. Ei säily rebootin jälkeen
 kulutusTietokanta=os.getcwd()+"/opt/sahkomittari-server/data/kulutus.db"
@@ -23,9 +23,11 @@ logger.setLevel(logging.CRITICAL)
 logger.addHandler(logging.StreamHandler())
 
 def lokita(rivi):
-    kello=time.strftime("%y%m%d-%H%M%S")
-    print(kello, rivi)
-    sys.stdout.flush()
+    if DEBUG:
+        kello=time.strftime("%y%m%d-%H%M%S")
+        tamaskripti=os.path.basename(__file__)
+        with open ("/var/log/sahkomittarilokit.txt", "a") as lkirj:
+            lkirj.write(kello+" "+tamaskripti+": "+rivi+"\n")
 
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
     pass
@@ -38,7 +40,7 @@ def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut 
     #    mittariRaspit.pop(client)
 
 def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
-    #print(message)
+    lokita("saatu raspilta "+message) #qqq
     asiakasIP, asiakasPortti=(client["address"])
     jsmessage=json.loads(message)
     if "konffi" in jsmessage: # asiakas lähettää konffitiedostonsa tänne qEI-KÄYTÖSSÄ

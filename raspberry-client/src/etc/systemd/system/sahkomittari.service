@@ -5,8 +5,8 @@ After=network.target
 [Service]
 ExecStart=/opt/sahkomittari/raspisahkomittari.py
 WorkingDirecty=/tmp
-StandardOutput=file:/var/log/sahkomittari-client-std.log
-StandardError=file:/var/log/sahkomittari-client-err.log
+#StandardOutput=file:/var/log/sahkomittari-client-std.log
+#StandardError=file:/var/log/sahkomittari-client-err.log
 Restart=always
 User=root
 

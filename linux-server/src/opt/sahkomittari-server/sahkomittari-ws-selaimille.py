@@ -14,11 +14,14 @@ from websocket_server import WebsocketServer
 from datetime import datetime
 
 SHMHAKEMISTO="/dev/shm/sahkomittari-server"
+DEBUG=True
 
 def lokita(rivi):
-    kello=time.strftime("%y%m%d-%H%M%S")
-    print(kello, rivi)
-    sys.stdout.flush()
+    if DEBUG:
+        kello=time.strftime("%y%m%d-%H%M%S")
+        tamaskripti=os.path.basename(__file__)
+        with open ("/var/log/sahkomittarilokit.txt", "a") as lkirj:
+            lkirj.write(kello+" "+tamaskripti+": "+rivi+"\n")
 
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
     print("liittyi " + str(client))
@@ -31,6 +34,7 @@ def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
     server.send_message_to_all(viesti)
+    lokita( "lähetetään selaimille "+ viesti) #qqq
 
 def wsSelaimille(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
     global server
@@ -68,11 +72,15 @@ class Handler(FileSystemEventHandler): #Kun tiedostot SHM-hakemistossa muuttunee
         elif event.event_type == 'modified':
             lokita("Received modified event - %s." % event.src_path)
             aika=datetime.now().strftime("%H:%M:%S")
-            ip=os.path.basename(event.src_path) 
-            with open (event.src_path, "r") as fReaali:
-                kulutus, reaaliaikainen, pulssit, info, lampo, kosteus=fReaali.read().split(";")
-                #print(ip,kulutus,reaaliaikainen,pulssit)
-            lahetaBroadCast('{"elementit": [{"elementti": "nahty_'+ip+'", "arvo": "'+aika+'"}, {"elementti": "kwh_'+ip+'", "arvo": "'+kulutus+'"}, {"elementti": "reaali_'+ip+'", "arvo": "'+reaaliaikainen+'"}, {"elementti": "pulssit_'+ip+'", "arvo": "'+pulssit+'"}, {"elementti": "info_'+ip+'", "arvo" : "'+info+'"}, {"elementti": "lampo_'+ip+'", "arvo" : "'+lampo+'"}, {"elementti": "kosteus_'+ip+'", "arvo" : "'+kosteus+'"} ]}')
+            ip=os.path.basename(event.src_path)
+            try:
+                with open (event.src_path, "r") as fReaali:
+                    tiedot=fReaali.read()
+                    print(tiedot)
+                    kulutus, reaaliaikainen, pulssit, info, lampo, kosteus=tiedot.split(";")
+                lahetaBroadCast('{"elementit": [{"elementti": "nahty_'+ip+'", "arvo": "'+aika+'"}, {"elementti": "kwh_'+ip+'", "arvo": "'+kulutus+'"}, {"elementti": "reaali_'+ip+'", "arvo": "'+reaaliaikainen+'"}, {"elementti": "pulssit_'+ip+'", "arvo": "'+pulssit+'"}, {"elementti": "info_'+ip+'", "arvo" : "'+info+'"}, {"elementti": "lampo_'+ip+'", "arvo" : "'+lampo+'"}, {"elementti": "kosteus_'+ip+'", "arvo" : "'+kosteus+'"} ]}')
+            except:
+                lokita("ERR virhe luettaessa /dev/shm/ tiedostoa. Tiedosto on ehkä tyhjä")
 
 if __name__ == '__main__':
     os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)

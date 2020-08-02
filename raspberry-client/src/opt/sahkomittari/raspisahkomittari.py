@@ -2,14 +2,17 @@
 import time, os, sys, socket, threading, websocket, configparser, Adafruit_DHT
 import RPi.GPIO as GPIO
 #----------------------------------------------------------------
+DEBUG=True
 skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin fyysinen sijainti configia varten
 config = configparser.ConfigParser(inline_comment_prefixes=('#', ';'))
 config.read(skriptinHakemisto+'/sahkomittari.ini')
 
 def lokita(rivi):
-    kello=time.strftime("%y%m%d-%H%M%S")
-    print(kello, rivi)
-    sys.stdout.flush()
+    if DEBUG:
+        kello=time.strftime("%y%m%d-%H%M%S")
+        tamaskripti=os.path.basename(__file__)
+        with open ("/var/log/sahkomittarilokit.txt", "a") as lkirj:
+            lkirj.write(kello+" "+tamaskripti+": "+rivi+"\n")
 
 class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUKSEEN LIITTYVÄN LASKENNAN --------------------------
     def __init__(self, callback):
@@ -44,6 +47,7 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
             GPIO.wait_for_edge(self.pulssipinni, GPIO.RISING) #odotetaan nouseva reuna
             self.aikaaEdPulssista=time.time()-self.viimPulssiAika
             self.pulssilaskuri+=1
+            lokita(str(self.pulssilaskuri)) #qqq
             self.viimPulssiAika=time.time()
             GPIO.wait_for_edge(self.pulssipinni, GPIO.FALLING) #odotetaan laskeva reuna
 
