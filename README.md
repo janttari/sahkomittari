@@ -65,3 +65,16 @@ TODO:
 -sivu josta näkee tallennetut lukemat plus csv-vienti  
 -tietokantojen varmuuskopiointi-lataus selaimella  
 
+-------
+LOKITUS (SEKÄ CLIENT, ETTÄ SERVER)
+Aseta tiedostoissa:
+```
+/opt/sahkomittari/raspisahkomittari.py
+/opt/sahkomittari-server/sahkomittari-server.py
+/opt/sahkomittari-server/sahkomittari-ws-selaimille.py
+```
+DEBUG = True  
+tai  
+DEBUG = False  
+lokit tallennetaan tiedostoon **/var/log/sahkomittarilokit.txt**  
+
