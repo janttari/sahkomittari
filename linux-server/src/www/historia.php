@@ -5,7 +5,7 @@ echo "Historia asiakkaalle: ".$ip. "<br><br><pre>";
 echo "<pre>";
 echo "unix-aika;ip;kwh;pulssit;tuntikohtainen;lampo;kosteus;ulkolampo;ulkokosteus;<br>";
         $db_kulutus = new SQLite3('/opt/sahkomittari-server/data/kulutus.db');
-        $sql = "SELECT * from kulutus WHERE ip='192.168.4.222' ORDER BY aikaleima";
+        $sql = "SELECT * from kulutus WHERE ip='".$ip."' ORDER BY aikaleima";
         $kys_kulutus = $db_kulutus->query($sql);
         while($ret_kulutus = $kys_kulutus->fetchArray(SQLITE3_ASSOC)) {
                echo $ret_kulutus['aikaleima'] . ";" . $ret_kulutus['ip'] . ";" . $ret_kulutus['kwh'] . ";" . $ret_kulutus['pulssit'] . ";" . $ret_kulutus['tuntikohtainen'] . ";" . $ret_kulutus['lampo'] . ";" . $ret_kulutus['kosteus'] . ";" . $ret_kulutus['ulkolampo'] . ";" . $ret_kulutus['ulkokosteus'] . ";<br>" ;
