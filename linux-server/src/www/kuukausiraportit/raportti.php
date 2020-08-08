@@ -15,7 +15,7 @@
         date_default_timezone_set('Europe/Helsinki');
         $skkalku = $vuosi."-".$kuukausi."-"."01";
         $ukkalku = mktime(0, 0, 0, $kuukausi, 1, $vuosi ); //kuukauden ensimmäinen ajankohta unix-aikana
-        $skkviimpv= date("t", strtotime($skkalku)); //kyseisen kuukauden viimeinen päivä numero
+        $skkviimpv= date("t", strtotime($skkalku)); //kyseisen kuukauden viimeisen päivän numero
         $ukkloppu = mktime(23, 59, 59, $kuukausi, $skkviimpv, $vuosi); //kuukauden viimeinen ajankohta unix-aikana
         //echo $ukkalku . "-". $ukkloppu;
         $db_asiakkaat = new SQLite3('/opt/sahkomittari-server/data/asiakkaat.db');
