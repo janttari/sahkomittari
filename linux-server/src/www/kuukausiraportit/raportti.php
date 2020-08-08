@@ -25,7 +25,7 @@
         echo "<pre>";
         while($row = $ret_asiakkaat->fetchArray(SQLITE3_ASSOC) ) {
             //Kysellään kuukauden ensimmäinen kulutuslukema, koska siinä on edellisen kuukauden loppulukema
-            $sql = "SELECT * from kulutus WHERE IP='".$row['ip']."' AND aikaleima BETWEEN ".$ukkalku." AND ".$ukkloppu." ORDER BY aikaleima LIMIT 1";
+            $sql = "SELECT * from kulutus WHERE ip='".$row['ip']."' AND aikaleima BETWEEN ".$ukkalku." AND ".$ukkloppu." ORDER BY aikaleima LIMIT 1";
             $ret_kulutus = $db_kulutus->query($sql);
             $row_kulutus = $ret_kulutus->fetchArray(SQLITE3_ASSOC);
             $kwh=$row_kulutus['kwh'];
