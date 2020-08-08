@@ -50,7 +50,9 @@ ws.onmessage = function(event) {
         }
 }
 </script>
-<a href="asiakashallinta/">Asiakashallinta</a><br><br>
+<a href="asiakashallinta/">[Asiakashallinta]</a> 
+<a href="kuukausiraportit/">[Kuukausiraportit]</a>
+<br><br>
 <table>
 	<tr>
 		<td>
@@ -63,7 +65,7 @@ ws.onmessage = function(event) {
     </tr>
 </table>
 <br>
-<table border=1><tr><td width="300">nähty</td><td width="100">ip</td><td width="100">numero</td><td width="100">nimi</td><td width="100">kwh</td><td width="100">reaaliaik</td><td width="100">pulssit</td><td width="100">info</td><td width="100">lampo</td><td width="100">kosteus</td></tr>
+<table border=1><tr><td width="300">nähty</td><td width="100">ip</td><td width="100">numero</td><td width="100">nimi</td><td width="100">kwh</td><td width="100">reaaliaik</td><td width="100">pulssit</td><td width="100">info</td><td width="100">lampo</td><td width="100">kosteus</td><td width="100">historia</td></tr>
 <?php 
     $db_asiakkaat = new SQLite3('/opt/sahkomittari-server/data/asiakkaat.db');
     $db_kulutus = new SQLite3('/opt/sahkomittari-server/data/kulutus.db');
@@ -77,7 +79,7 @@ ws.onmessage = function(event) {
         $pulssit=$row_kulutus['pulssit'];
         $lampo=$row_kulutus['lampo'];
         $kosteus=$row_kulutus['kosteus'];
-        echo "<tr><td id=nahty_".$row['ip'].">---</td></td---><td>". $row['ip'] . "</td><td>". $row['numero'] ."</td><td>". $row['nimi'] ."</td><td id=kwh_".$row['ip'].">".$kwh."</td><td id=reaali_".$row['ip'].">---</td><td id=pulssit_".$row['ip'].">".$pulssit."</td></td><td id=info_".$row['ip'].">REC</td><td id=lampo_".$row['ip'].">...</td><td id=kosteus_".$row['ip'].">...</td></tr><br>";
+        echo "<tr><td id=nahty_".$row['ip'].">---</td></td---><td>". $row['ip'] . "</td><td>". $row['numero'] ."</td><td>". $row['nimi'] ."</td><td id=kwh_".$row['ip'].">".$kwh."</td><td id=reaali_".$row['ip'].">---</td><td id=pulssit_".$row['ip'].">".$pulssit."</td></td><td id=info_".$row['ip'].">REC</td><td id=lampo_".$row['ip'].">...</td><td id=kosteus_".$row['ip'].">...</td><td><a href=\"historia.php?ip=".$row['ip']."\">historia</a></td></tr><br>";
     }
    
     $db_asiakkaat->close();
