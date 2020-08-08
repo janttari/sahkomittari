@@ -75,7 +75,7 @@ $isEdit = isset($_REQUEST['edit']) ? true : false;
 	</style>
 </head>
 <body>
-<a href="../">Paluu</a><br><br>
+<a href="../">[Palaa]</a><br><br>
 	<div style="margin: 0 auto; width: 800px;">
 		<div>
 			<form style="display:<?php echo $isEdit ? 'none':'block'; ?>" action="" method="post">

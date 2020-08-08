@@ -23,6 +23,7 @@
         $sql = "SELECT * from asiakkaat";
         $ret_asiakkaat = $db_asiakkaat->query($sql);
         echo "<pre>";
+        echo "ip;numero;nimi;kulutus\n";
         while($row = $ret_asiakkaat->fetchArray(SQLITE3_ASSOC) ) {
             //Kysellään kuukauden ensimmäinen kulutuslukema, koska siinä on edellisen kuukauden loppulukema
             $sql = "SELECT * from kulutus WHERE ip='".$row['ip']."' AND aikaleima BETWEEN ".$ukkalku." AND ".$ukkloppu." ORDER BY aikaleima LIMIT 1";

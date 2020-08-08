@@ -26,7 +26,7 @@ ws.onclose = function() {
 ws.onmessage = function(event) {
 	aika=new Date().toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric", second: "numeric"});
     ruudulle("yhteys","<font color='green'>"+aika+"</font>");
-                                             
+
     var json = JSON.parse(event.data);
         for (it in json.elementit){
             console.log(json.elementit[it]);
