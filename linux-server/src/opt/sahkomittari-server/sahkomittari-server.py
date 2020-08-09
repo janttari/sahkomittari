@@ -1,7 +1,6 @@
 #!/usr/bin/env python3 
 # sudo pip3 uninstall websocket_server sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
 #
-# Tässä ei ole ws-palvelua selaimelle. tehdään siitä kokonaan oma ohjelma tietoturvan vuoksi! se skripti voi käyttää /dev/shm ja inotify
 #
 
 from websocket_server import WebsocketServer
@@ -80,7 +79,7 @@ def kuuntelija(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
 def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tiedostoon
     lokita("tallennaPysyvat")
     aika=str(int(time.time())) #unix-aikaleima
-    ulkolampo=-127.0 #haetaan tää lopullisessa versiossa tässä kohtaa
+    ulkolampo=-127.0 #haetaan tää lopullisessa versiossa tässä kohtaa serverin mittarilta?
     ulkokosteus=-127.0
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
@@ -96,6 +95,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
     conn.commit()
     conn.close()
     #print("**TALLENNA")
+    # !!! Tässä kohtaa voitaisiin lähettää lukemat varsinaiselle pääserverille kun tiedetään missä muodossa
 
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
@@ -113,15 +113,10 @@ if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
         time.sleep(1)
         kello=time.strftime("%H")
         if kello != viimTallennusaika and kierros!=0: #Jos tunti on vaihtunut:
-            tallennaPysyvat()
+            tallennaPysyvat() #Tasatunnein tallennetaan lukemat tietokantaan pysyvästi
             viimTallennusaika=kello
         else:
             if kierros==0:               #jos on ohjelman ensimmäinen suorituskierros, mitään tallennettavaa ei vielä voi olla
                 viimTallennusaika=kello
                 lokita("eka kierros")
-        #if kierros%10==0:
-        #    aika=datetime.now().strftime("%H:%M:%S")
-        #    #lahetaSelaimille('{"elementit": [{"elementti": "192.168.4.222_kwh", "arvo": "'+aika+'"},{"elementti": "192.168.4.150_kwh", "arvo": "12.3"}]}')
-        #    print(kierros)
-        #    #tallennaPysyvat() #qqq testi
         kierros+=1
