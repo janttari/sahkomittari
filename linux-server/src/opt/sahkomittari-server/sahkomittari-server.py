@@ -78,7 +78,8 @@ def kuuntelija(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
 
 def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tiedostoon
     lokita("tallennaPysyvat")
-    aika=str(int(time.time())) #unix-aikaleima
+    #aika=str(int(time.time())) #unix-aikaleima
+    aika=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ulkolampo=-127.0 #haetaan tää lopullisessa versiossa tässä kohtaa serverin mittarilta?
     ulkokosteus=-127.0
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
