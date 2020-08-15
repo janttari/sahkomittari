@@ -100,7 +100,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL, ulkokosteus REAL)')
+    c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima DATE, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL, ulkokosteus REAL)')
     conn.commit()
     conn.close()
     #os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)

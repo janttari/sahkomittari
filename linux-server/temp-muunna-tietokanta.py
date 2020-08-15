@@ -12,7 +12,7 @@ conn = sqlite3.connect(tietokanta)
 connu = sqlite3.connect(tmptietokanta)
 c = conn.cursor()
 cu = connu.cursor()
-cu.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima INTEGER, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL, ulkokosteus REAL)')
+cu.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima DATE, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL, ulkokosteus REAL)')
 kys=c.execute('SELECT * FROM kulutus')
 for i in kys:
     aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo, ulkokosteus = i
