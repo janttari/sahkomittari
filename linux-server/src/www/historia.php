@@ -3,7 +3,7 @@ $ip=$_GET["ip"];
 echo "<a href='index.php'>[palaa]</a><br>";
 echo "Historia asiakkaalle: ".$ip. "<br><br><pre>";
 echo "<pre>";
-echo "unix-aika;ip;kwh;pulssit;tuntikohtainen;lampo;kosteus;ulkolampo;ulkokosteus;\n";
+echo "aikaleima;ip;kwh;pulssit;tuntikohtainen;lampo;kosteus;ulkolampo;ulkokosteus;\n";
         $db_kulutus = new SQLite3('/opt/sahkomittari-server/data/kulutus.db');
         $sql = "SELECT * from kulutus WHERE ip='".$ip."' ORDER BY aikaleima";
         $kys_kulutus = $db_kulutus->query($sql);
