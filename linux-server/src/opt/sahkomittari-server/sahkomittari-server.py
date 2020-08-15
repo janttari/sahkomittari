@@ -78,7 +78,7 @@ def kuuntelija(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
 
 def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tiedostoon
     lokita("tallennaPysyvat")
-    #aika=str(int(time.time())) #unix-aikaleima
+    aika=str(int(time.time())) #unix-aikaleima
     aika=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ulkolampo=-127.0 #haetaan tää lopullisessa versiossa tässä kohtaa serverin mittarilta?
     ulkokosteus=-127.0
@@ -92,7 +92,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
         if edtunti is None: #tietokannassa ei vielä ole kulutustietoa...
             edtunti=float(kwhMuisti[asiakasIP]) #...joten kaikki kulutus on tälle tunnille
         tuntikohtainen=str(float(kwhMuisti[asiakasIP])-float(edtunti))
-        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo, ulkokosteus) VALUES('+aika+', "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+', '+lampoMuisti[asiakasIP]+', '+kosteusMuisti[asiakasIP]+', '+str(ulkolampo)+', '+str(ulkokosteus)+')')
+        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo, ulkokosteus) VALUES("'+aika+'", "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+', '+lampoMuisti[asiakasIP]+', '+kosteusMuisti[asiakasIP]+', '+str(ulkolampo)+', '+str(ulkokosteus)+')')
     conn.commit()
     conn.close()
     #print("**TALLENNA")
