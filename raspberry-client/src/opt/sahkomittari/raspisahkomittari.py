@@ -2,7 +2,7 @@
 import time, os, sys, socket, threading, websocket, configparser, Adafruit_DHT
 import RPi.GPIO as GPIO
 #----------------------------------------------------------------
-DEBUG=True
+DEBUG=False
 skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin fyysinen sijainti configia varten
 config = configparser.ConfigParser(inline_comment_prefixes=('#', ';'))
 config.read(skriptinHakemisto+'/sahkomittari.ini')

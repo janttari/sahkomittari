@@ -14,7 +14,7 @@ from websocket_server import WebsocketServer
 from datetime import datetime
 
 SHMHAKEMISTO="/dev/shm/sahkomittari-server"
-DEBUG=True
+DEBUG=False
 
 def lokita(rivi):
     if DEBUG:
