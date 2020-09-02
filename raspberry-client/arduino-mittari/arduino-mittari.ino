@@ -1,5 +1,5 @@
 /*
-    Laskee sähkömittarin S0 pulsseja ja tulostaa dataa sarjaportitin.
+    Laskee sähkömittarin S0 pulsseja ja tulostaa dataa sarjaporttiin.
     
     AJASTETTU SANOMA JOS EI PULSSEJA OLE HETKEEN SAATU:
     a;32;333;6745
