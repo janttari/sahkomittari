@@ -52,7 +52,7 @@ void onPulssi() {
       alkuaika = millis();
     }
     else {
-      if (millis() - alkuaika > minPulssiPituus) {
+      if (millis() - alkuaika >= minPulssiPituus) {
         pulssiLaskuri++;
         Serial.println("r;" + String(pulssiLaskuri) + ";" + String(millis() - viimPulssiAika) + ";"  + String(millis())); //Sanoma **r** reaaliaikanen (kertoo ajan tämän ja edellisen pulssin välillä)
         viimPulssiAika = millis();
