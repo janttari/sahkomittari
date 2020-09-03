@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
-#!!! lisää python-serial riippuvuuksiin ja poista adafruit RPi.GPIO 
-#
-import time, os, sys, socket, threading, websocket, configparser, serial
-
+import time, os, sys, socket, threading, websocket, configparser, Adafruit_DHT
+import RPi.GPIO as GPIO
 #----------------------------------------------------------------
 DEBUG=False
 skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin fyysinen sijainti configia varten
@@ -20,61 +18,61 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
     def __init__(self, callback):
         '''self, pulssipinni, viestikanava, pulssiValue, maxLahetysTiheys, maxAliveTiheys, imp_per_kwh'''
         self.callback=callback
-        #self.lampo=-123.0
-        #self.kosteus=-124.0
-        self.edArduinonPulssiMaara=0 #edellinen arduinon ilmoittama pulssilukema jotta voidaan laskea lisäys
-        self.sarjaportti=config['yleiset']['sarjaportti']
+        self.lampo=-127.0
+        self.kosteus=-127.0
+        self.pulssipinni=int(config['yleiset']['pulssipinni'])
+        if config.has_option('yleiset', 'lampopinni'): #Jos lämpömittarin pinni määritelty
+            self.lampopinni=int(config['yleiset']['lampopinni'])
+            self.lampomittaavali=int(config['yleiset']['lampomittaavali'])
+            self.DHT_SENSOR = Adafruit_DHT.DHT22
+        else:
+            self.lampopinni=None
         self.lampoMitattu=0 # aikaleima viimeisestä lämpömittauksesta
         self.pulssilaskuri = -1 #lasketaan tähän pulssit
         self.maxLahetysTiheys=float(config['yleiset']['maxtiheys'])
         self.maxAliveTiheys=float(config['yleiset']['alive'])
         self.imp=int(config['yleiset']['imp'])
-        self.viimWsLahetys = 0 #unix aika, milloin on viimeksi lähetetty lukemat
-        self.viimWsPulssiMaara = 0 #viimeisen lähetyksen pulssimäärä
-        self.viimWsLahetysAika = 0  #viimeisimmän pulssin aikaleima
-        self.sarjaporttiLukija = threading.Thread(target=self.lueSarjaportti) #Lukee pinnin tilan prosessi
-        self.sarjaporttiLukija.start()
-
-    def lueSarjaportti(self): #Varsinainen sarjaporttia lukeva osa
-        sp=serial.Serial(port=self.sarjaportti, baudrate=57600,parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=10)
-        time.sleep(1) #jotta konffi tallennettu pulssimäärä on ehditty lukemaan muistikortilta
+        self.viimLahetys = 0 #unix aika, milloin on viimeksi lähetetty lukemat
+        self.viimPulssimaara = 0 #viimeisen lähetyksen pulssimäärä
+        self.viimPulssiAika = 0  #viimeisimmän pulssin aikaleima
+        self.aikaaEdPulssista = 1
+        self.pinninLukija = threading.Thread(target=self.luePinni) #Lukee pinnin tilan prosessi
+        self.pinninLukija.start()
+        self.valvoja=threading.Thread(target=self.valvoPulsseja)
+        self.valvoja.start()
+    def luePinni(self): #Varsinainen pinniä lukeva osa
+        GPIO.setmode(GPIO.BCM) #https://www.raspberrypi-spy.co.uk/2012/06/simple-guide-to-the-rpi-gpio-header-and-pins/
+        GPIO.setup(self.pulssipinni, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #käytetään sisäistä alasvetoa
         while True:
-            sdata=sp.readline().decode().rstrip()
-            print(sdata)
-            if len(sdata)>=-5:
-                try:
-                    if sdata[0] == "a" or "r":
-                        palat=sdata.split(";")
-                        pulssit=int(palat[1])
-                        vali=float(palat[2])/1000
-                        lampo=float(palat[4])
-                        kosteus=float(palat[5])
-                        if self.edArduinonPulssiMaara != 0:
-                            lisays=pulssit-self.edArduinonPulssiMaara
-                            self.edArduinonPulssiMaara+=lisays
-                            self.pulssilaskuri+=lisays
-                        else:
-                            self.edArduinonPulssiMaara= pulssit
-                            lisays=0
-                        if time.time()-self.viimWsLahetysAika >= self.maxAliveTiheys or self.viimWsLahetysAika==0: #ALIVE
-                            self.viimWsLahetysAika=time.time()
-                            self.viimWsPulssiMaara=self.pulssilaskuri
-                            self.lahetaWs("alive", self.pulssilaskuri, vali, lampo, kosteus)
-                        elif time.time()-self.viimWsLahetysAika >= self.maxLahetysTiheys and self.viimWsPulssiMaara != self.pulssilaskuri: #PULSSIT MUUTTUNEET
-                            self.lahetaWs("kulutus", self.pulssilaskuri, vali, lampo, kosteus)
-                            self.viimWsLahetysAika=time.time()
-                            self.viimWsPulssiMaara=self.pulssilaskuri
-                    time.sleep(0.05)
-                except:
-                    print("sarjaportista tuli paskaa, ohitettu!")
+            GPIO.wait_for_edge(self.pulssipinni, GPIO.RISING) #odotetaan nouseva reuna
+            self.aikaaEdPulssista=time.time()-self.viimPulssiAika
+            self.pulssilaskuri+=1
+            lokita(str(self.pulssilaskuri)) #qqq
+            self.viimPulssiAika=time.time()
+            GPIO.wait_for_edge(self.pulssipinni, GPIO.FALLING) #odotetaan laskeva reuna
 
-    def lahetaWs(self, tyyppi, pulssienMaara,pulssienVali, lampo, kosteus): #lähetetään ws palvelimelle    
-        tmpKwh="{:.5f}".format(pulssienMaara*1000/self.imp/1000) #kokonaiskulutus kwh
-        tmpReaaliaikainen="{:.5f}".format(((1000/self.imp*3600)/pulssienVali)/1000) #kulutusta on tällä hetkellä kW
-        tmpLampo="{:.2f}".format(lampo)
-        tmpKosteus="{:.2f}".format(kosteus)
-        #pääohjelman callback 'lahetaWsServerille' hoitaa varsinaisen lähetyksen websocketilla:
-        self.callback((pulssienMaara, tmpKwh, tmpReaaliaikainen, tyyppi, lampo, kosteus)) #tuple (int pulssimäärä, str kokonaiskulutus, str reaaliaik, str info)
+    def valvoPulsseja(self): #Tämä seuraa saapuvia pulsseja ja milloin pitää lähettää alive
+        time.sleep(3) #Odotetaan hetki kunnes tallennetut lukemat on saatu varmasti
+        while True:
+            if (time.time()-self.viimLahetys>self.maxLahetysTiheys and self.viimPulssimaara != self.pulssilaskuri) or (time.time()-self.viimLahetys>self.maxAliveTiheys):
+                self.viimLahetys=time.time()
+                if self.viimPulssimaara != self.pulssilaskuri: #jos pulsseja on tullut
+                    self.viimPulssimaara = self.pulssilaskuri
+                    tmpInfo="kulutus"
+                else:
+                    tmpInfo="alive"
+                    self.aikaaEdPulssista=time.time()-self.viimPulssiAika
+                tmpPulssit=int(self.pulssilaskuri)
+                tmpKwh="{:.5f}".format(tmpPulssit*1000/self.imp/1000) #kokonaiskulutus kwh
+                tmpReaaliaikainen="{:.5f}".format(((1000/self.imp*3600)/self.aikaaEdPulssista)/1000) #kulutusta on tällä hetkellä kW
+                if self.lampopinni is not None: #jos lämpötilan mittaus käytössä, luetaan se tässä vaiheessa koska se blokkaa. !!TODO
+                    if time.time()-self.lampoMitattu > self.lampomittaavali: #viimeisestä lämpömittauksesta aikaa tarpeeksi
+                        self.lampoMitattu=time.time()
+                        kosteus, lampo = Adafruit_DHT.read_retry(self.DHT_SENSOR, self.lampopinni) #varsinainen lämmön mittaus
+                        self.kosteus=round(kosteus,1) #ylimääräiset desimaalit pois
+                        self.lampo=round(lampo,1)
+                self.callback((tmpPulssit, tmpKwh, tmpReaaliaikainen, tmpInfo, self.lampo, self.kosteus)) #tuple (int pulssimäärä, str kokonaiskulutus, str reaaliaik, str info)
+            time.sleep(0.05)
 
     def setPulssilukema(self, lukema): #Voidaan asettaa pulssien määrä
         self.pulssilaskuri=lukema
@@ -125,10 +123,9 @@ class WsAsiakas(): #------------------------------------------------------------
         self.t.start()
 #------------------------------------------------------------------------------------------------------------------------------------
 
-def lahetaWsServerille(data): #Tämä kutsutaan kun pulssien saatu
+def vastaanotaImpulssi(data): #Tämä kutsutaan kun pulssien saatu
     pulssimaara, kwh, reaaliaik, info, lampo, kosteus = data
     rivi='{"kwh": "'+kwh+'", "pulssit": "'+str(pulssimaara)+'", "reaaliaikainen": "'+reaaliaik+'", "info": "'+info+'", "lampo": "'+str(lampo)+'", "kosteus": "'+str(kosteus)+'"}'
-    print(rivi)
     wsAsiakas.lahetaWs(rivi)
 
 def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
@@ -139,7 +136,7 @@ def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
 if __name__ == "__main__": #----------------------------------------------------------------------------------------------------------
     wsAsiakas=WsAsiakas()
     viimtallennettuPulssiAika=time.time() #aika jolloin pulssi on viimeksi tallennettu tiedostoon
-    mittari=Mittaaja(lahetaWsServerille)
+    mittari=Mittaaja(vastaanotaImpulssi)
     time.sleep(0.5)
     if os.path.isfile(config['yleiset']['pulssipysyva']): #Jos on olemassa tallennettu pulssilukema
         lokita("lue kulutus tiedostosta")

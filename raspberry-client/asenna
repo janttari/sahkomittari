@@ -1,4 +1,8 @@
 #!/bin/bash
+
+sudo sed -i '/^enable_uart/d' /boot/config.txt #sarjaportti
+echo 'enable_uart=1' |sudo tee -a /boot/config.txt >/dev/null #sarjaportti
+
 sudo apt -y install git #lisää tää  listaan!
 rm -rf /tmp/sahkomittari.ini
 if [ -f "/opt/sahkomittari/sahkomittari.ini" ]; then
@@ -16,6 +20,13 @@ fi
 echo "Tarkistetaan Python-pakettien riippuvuudet..."
 
 
+echo pyserial
+if [[ -z $(pip3 list|grep "pyserial") ]]; then
+    echo Asennetaan websocket-client
+    sudo pip3 install pyserial
+fi
+
+
 echo websocket-client
 if [[ -z $(pip3 list|grep "websocket-client") ]]; then
     echo Asennetaan websocket-client
@@ -23,17 +34,17 @@ if [[ -z $(pip3 list|grep "websocket-client") ]]; then
 
 fi
 
-echo RPi.GPIO
-if [[ -z $(pip3 list|grep "RPi.GPIO") ]]; then
-    echo Asennetaan RPi.GPIO
-    sudo pip3 install RPi.GPIO
-fi
+#echo RPi.GPIO
+#if [[ -z $(pip3 list|grep "RPi.GPIO") ]]; then
+#    echo Asennetaan RPi.GPIO
+#    sudo pip3 install RPi.GPIO
+#fi
 
-echo Adafruit-DHT
-if [[ -z $(pip3 list|grep "Adafruit-DHT") ]]; then
-    echo Asennetaan Adafruit-DHT
-    sudo pip3 install Adafruit_DHT
-fi
+#echo Adafruit-DHT
+#if [[ -z $(pip3 list|grep "Adafruit-DHT") ]]; then
+#    echo Asennetaan Adafruit-DHT
+#    sudo pip3 install Adafruit_DHT
+#fi
 
 echo Kopioidaan tiedostot...
 sudo cp -R src/* /
