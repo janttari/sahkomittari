@@ -1,6 +1,6 @@
 # sahkomittari
-asennus **RASPBERRY CLIENT**:
-Tämä versio ottaa vastaan sarjaportin kautta Arduinon lähettämän datan
+asennus **RASPBERRY CLIENT**:  
+Tämä versio ottaa vastaan sarjaportin kautta Arduinon lähettämän datan  
 
     cd ~
     git clone https://github.com/janttari/sahkomittari.git
