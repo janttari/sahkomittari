@@ -1,7 +1,7 @@
 # sahkomittari
 asennus **RASPBERRY CLIENT**:  
 ```diff
-Tämä versio ottaa vastaan sarjaportin kautta Arduinon lähettämän datan  
++ Tämä versio ottaa vastaan sarjaportin kautta Arduinon lähettämän datan  
 ```
 
     cd ~
