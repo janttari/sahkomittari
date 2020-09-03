@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#!!! lisää python-serial riippuvuuksiin ja poista adafruit RPi.GPIO 
+#!!! lisää python-serial riippuvuuksiin ja poista adafruit RPi.GPIO
 #
 import time, os, sys, socket, threading, websocket, configparser, serial
 
@@ -40,7 +40,6 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
         time.sleep(1) #jotta konffi tallennettu pulssimäärä on ehditty lukemaan muistikortilta
         while True:
             sdata=sp.readline().decode().rstrip()
-            print(sdata)
             if len(sdata)>=-5:
                 try:
                     if sdata[0] == "a" or "r":
@@ -97,7 +96,7 @@ class WsAsiakas(): #------------------------------------------------------------
                                   on_close = self.on_close,
                                   on_open = self.on_open)
         self.ws.run_forever()
-        
+
     def on_message(self, ws, message):
         pass
 
@@ -128,7 +127,6 @@ class WsAsiakas(): #------------------------------------------------------------
 def lahetaWsServerille(data): #Tämä kutsutaan kun pulssien saatu
     pulssimaara, kwh, reaaliaik, info, lampo, kosteus = data
     rivi='{"kwh": "'+kwh+'", "pulssit": "'+str(pulssimaara)+'", "reaaliaikainen": "'+reaaliaik+'", "info": "'+info+'", "lampo": "'+str(lampo)+'", "kosteus": "'+str(kosteus)+'"}'
-    print(rivi)
     wsAsiakas.lahetaWs(rivi)
 
 def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
