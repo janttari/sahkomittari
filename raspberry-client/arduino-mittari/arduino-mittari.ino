@@ -1,20 +1,23 @@
 /*
     Laskee sähkömittarin S0 pulsseja ja tulostaa dataa sarjaporttiin.
-    
+
     AJASTETTU SANOMA JOS EI PULSSEJA OLE HETKEEN SAATU:
     a;32;333;6745;
-    jossa a on sanoman tyyppi (ajastin), 32 on pulssien määrä, 333 aika edellisestä pulssista ms ja 6745 Arduinon sisäinen millis(). 
+    jossa a on sanoman tyyppi (ajastin), 32 on pulssien määrä, 333 aika edellisestä pulssista ms ja 6745 Arduinon sisäinen millis().
 
     REAALIAIKAINEN TIETO KUN PULSSI SAADAAN:
     r;32;333;6745
-    jossa r on sanoman tyyppi (reaaliaikainen), 32 on pulssien määrä, 333 kahden viim mitatun pulssin väli ms ja 6745 Arduinon sisäinen millis(). 
+    jossa r on sanoman tyyppi (reaaliaikainen), 32 on pulssien määrä, 333 kahden viim mitatun pulssin väli ms ja 6745 Arduinon sisäinen millis().
 
     INFO KUN OHJELMA ARDUINO KÄYNNISTETÄÄN:
     i;start;versio=2020-09-02
-    
+
+    Arduinolle voi lähettää yhden tavun, joka laittaa 8 lähtöä haluttuun tilaan.
+
 */
 
 #define VERSIO "2020-09-02"
+const byte relePinnit[] = {4, 5, 6, 7, 8, 9, 10, 11}; // näissä pinneissä voi olla rele HUOMAA LÄHETTÄESSÄ BITTIJÄRJESTYS!
 #define LAHETYSVALI 1000 //Lähetetään sarjaporttiin nn millisekunnin välein
 
 #include <avr/wdt.h> //Watchdog
@@ -28,6 +31,11 @@ const byte mittariPinni = 2; //S0 tulee tähän pinniin. Pitää olla keskeyttä
 boolean viimTila = LOW; //Pulssin viimeinen tunnettu tila
 
 void setup() {
+  for ( byte a = 0; a < sizeof (relePinnit) ; a++) { //alustetaan releet
+    pinMode(relePinnit[a], OUTPUT);
+    digitalWrite(relePinnit[a], LOW);
+  }
+
   wdt_enable(WDTO_8S); //Watchdog
   Serial.begin(57600);
   Serial.println("i;start;versio=" + String(VERSIO)); //Sanoma **i** info
@@ -41,6 +49,21 @@ void loop() {
     Serial.println("a;" + String(pulssiLaskuri) + ";" + String(millis() - viimPulssiAika) + ";" + String(millis())); //Sanoma **a** ajastettu (kertoo ajan viimeisestä pulssista)
   }
   wdt_reset(); //Watchdogille elossaolosta ilmoitus
+
+  if (Serial.available() > 0) {
+    byte komento = Serial.read();
+    for ( int a = 0; a < sizeof (relePinnit) ; a++) {
+      if (bitRead(komento, a )) {
+        digitalWrite(relePinnit[a], HIGH);
+        //Serial.println("i;"+String(relePinnit[a])+" HIGH");
+      }
+      else {
+        digitalWrite(relePinnit[a], LOW);
+        //Serial.println("i;"+String(relePinnit[a])+" LOW");
+      }
+    }
+  }
+
   delay(50);
 }
 
