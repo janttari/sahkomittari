@@ -44,8 +44,8 @@ asentuu /opt/sahkomittari-server/
 mene internet-selaimella http://raspi_server_ip  
   
  sahkomittari-server.service (--> /opt/sahkomittari-server/sahkomittari-server.py) #vastaanottaa datan raspberryltä  
- reaaliaikainen lukema tallentuu löytyy portista 5007, katso:
-[a link] (https://github.com/janttari/sahkomittari/blob/main/linux-server/src/opt/sahkomittari-server/Viestit.py)
+ reaaliaikainen lukema tallentuu löytyy portista 5007, katso:  
+ (blob/main/linux-server/src/opt/sahkomittari-server/Viestit.py)
  kokonaikulutus;reaaliaikainen;pulssit;info;lämpötila;kosteus  
   
  
