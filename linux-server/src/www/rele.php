@@ -7,6 +7,15 @@ var socketUrl = 'ws://'+location.hostname+":8889";
 
 var ws = new  WebSocket(socketUrl);
 
+function lahetatavu(){ //lähetetään tavu releelle
+    let ip=document.getElementById("ip").value;
+    let tavu=document.getElementById("tavu").value;
+    let etakomento='{"komento": {"laite": "'+ip+'", "tavu": "'+tavu+'"}}';
+    console.log("Lähettää: "+etakomento);
+    ws.send(etakomento);
+
+}
+
 function ruudulle(kentta, sanoma) { //tulosta kenttä:arvo
     document.getElementById(kentta).innerHTML = sanoma + '\n';
 }
@@ -52,8 +61,13 @@ ws.onmessage = function(event) {
 </script>
 <a href="asiakashallinta/">[Asiakashallinta]</a> 
 <a href="kuukausiraportit/">[Kuukausiraportit]</a>
-<a href="rele.php">[RELE_TESTI]</a>
 <br><br>
+<form>
+    ip:<input type="text" id="ip"><br>
+    tavu:<input type="text" id="tavu"><br>
+   <input type="button" value="Lähetä" onclick="lahetatavu()">
+</form>
+<br>
 <table>
 	<tr>
 		<td>

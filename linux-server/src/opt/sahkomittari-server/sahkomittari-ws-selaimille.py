@@ -30,7 +30,11 @@ def client_left(client, server):    #selain katkaissut yhteyden.
     #print("lahti " + str(client))
 
 def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
-    print("msg_selaimelta " + str(client)+" "+str(message))
+    #print("msg_selaimelta " + str(client)+"!!! "+str(message))
+    jdata=json.loads(message)
+    if "komento" in jdata:
+        sisalto=str(jdata["komento"])
+        v.laheta(message) #Lähetetään komento edelleen raspberryjä palvelevalle serverille, joka ohjaa datan sitten mittaraspille
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
     server.send_message_to_all(viesti)

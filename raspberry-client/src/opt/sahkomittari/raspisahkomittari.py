@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #!!! lisää python-serial riippuvuuksiin ja poista adafruit RPi.GPIO
 #
-import time, os, sys, socket, threading, websocket, configparser, serial
+import time, os, sys, socket, threading, websocket, configparser, serial, json
 
 #----------------------------------------------------------------
 DEBUG=False
@@ -36,6 +36,9 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
         self.lammonMittaaja = threading.Thread(target=self.lueLampoanturi)
         self.lammonMittaaja.start()
 
+    def lahetaSarjaporttiin(self, luku): #kirjoittaa tavun sarjaporttiin daadaan luku 0..255
+        Sending = bytearray([int(luku)])
+        self.sp.write(Sending)
 
     def lueLampoanturi(self):
         time.sleep(5)
@@ -46,11 +49,11 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
 
 
     def lueSarjaportti(self): #Varsinainen sarjaporttia lukeva osa
-        sp=serial.Serial(port=self.sarjaportti, baudrate=57600,parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=10)
+        self.sp=serial.Serial(port=self.sarjaportti, baudrate=57600,parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=10)
         time.sleep(1) #jotta konffi tallennettu pulssimäärä on ehditty lukemaan muistikortilta
         while True:
-            sdata=sp.readline().decode().rstrip()
-            if len(sdata)>=-5:
+            sdata=self.sp.readline().decode().rstrip()
+            if len(sdata)>=3:
                 try:
                     if sdata[0] == "a" or "r":
                         palat=sdata.split(";")
@@ -104,8 +107,11 @@ class WsAsiakas(): #------------------------------------------------------------
                                   on_open = self.on_open)
         self.ws.run_forever()
 
-    def on_message(self, ws, message):
-        pass
+    def on_message(self, message):
+        jmessage=json.loads(message)
+        if "komento" in jmessage:
+            tavu=jmessage["komento"]["tavu"]
+            mittari.lahetaSarjaporttiin(tavu)
 
     def on_error(self, error):
         lokita("WS error: "+str(error))
@@ -113,7 +119,7 @@ class WsAsiakas(): #------------------------------------------------------------
     def on_close(self, ws):
         lokita("WS close")
 
-    def on_open(self, ws):
+    def on_open(self):
         lokita("WS open")
 
     def lahetaWs(self, sanoma):

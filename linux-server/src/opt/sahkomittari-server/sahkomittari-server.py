@@ -29,14 +29,12 @@ def lokita(rivi):
             lkirj.write(kello+" "+tamaskripti+": "+rivi+"\n")
 
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
-    pass
-    #print(client)
+    asiakasip=client["address"][0]
+    mittariRaspit[asiakasip]=client
 
 def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut yhteyden
-    pass
-    #asiakasIP, asiakasPortti=(client["address"])
-    #if asiakasIP in mittariRaspit: #tämä asiakas oli raspi
-    #    mittariRaspit.pop(client)
+    asiakasip=client["address"][0]
+    mittariRaspit.pop(asiakasip)
 
 def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
     lokita("saatu raspilta "+message) #qqq
@@ -61,6 +59,7 @@ def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
         #    fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit+";"+info+";"+lampoMuisti[asiakasIP]+";"+kosteusMuisti[asiakasIP]) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
+    #global server #???
     server.send_message_to_all(viesti)
 
 def lahetaRaspeille(viesti): #Lähetetään kaikille raspeille
@@ -100,7 +99,12 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
     # !!! Tässä kohtaa voitaisiin lähettää lukemat varsinaiselle pääserverille kun tiedetään missä muodossa
 
 def dataaSelainWebsocketilta(data):
-    pass
+    jdata=json.loads(data)
+    if "komento" in jdata:
+        kohde=jdata["komento"]["laite"]
+        tavu=jdata["komento"]["tavu"]
+        if kohde in mittariRaspit:
+            lahetaYksityinen(mittariRaspit[kohde], data)
 
 
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
