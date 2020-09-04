@@ -76,3 +76,9 @@ tai
 DEBUG = False  
 lokit tallennetaan tiedostoon **/var/log/sahkomittarilokit.txt**  
 
+-----
+Viestien reitti:  
+selain —> sahkomittari-ws-selaimille.py  —>  sahkomittari-server.py —> raspisahkomittari.py —> arduino  
+arduino —> raspisahkomittari.py —> sahkomittari-server.py —> sahkomittari-ws-selaimille.py —> selain  
+  
+
