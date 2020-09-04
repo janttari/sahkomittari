@@ -20,11 +20,10 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
     def __init__(self, callback):
         '''self, pulssipinni, viestikanava, pulssiValue, maxLahetysTiheys, maxAliveTiheys, imp_per_kwh'''
         self.callback=callback
-        #self.lampo=-123.0
-        #self.kosteus=-124.0
+        self.lampo=-123.0
+        self.kosteus=-124.0
         self.edArduinonPulssiMaara=0 #edellinen arduinon ilmoittama pulssilukema jotta voidaan laskea lisäys
         self.sarjaportti=config['yleiset']['sarjaportti']
-        self.lampoMitattu=0 # aikaleima viimeisestä lämpömittauksesta
         self.pulssilaskuri = -1 #lasketaan tähän pulssit
         self.maxLahetysTiheys=float(config['yleiset']['maxtiheys'])
         self.maxAliveTiheys=float(config['yleiset']['alive'])
@@ -34,6 +33,17 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
         self.viimWsLahetysAika = 0  #viimeisimmän pulssin aikaleima
         self.sarjaporttiLukija = threading.Thread(target=self.lueSarjaportti) #Lukee pinnin tilan prosessi
         self.sarjaporttiLukija.start()
+        self.lammonMittaaja = threading.Thread(target=self.lueLampoanturi)
+        self.lammonMittaaja.start()
+
+
+    def lueLampoanturi(self):
+        time.sleep(5)
+        while True:
+            rivi='{"lampo": "-111.1", "kosteus": "-222.2"}'
+            self.callback(rivi)
+            time.sleep(60)
+
 
     def lueSarjaportti(self): #Varsinainen sarjaporttia lukeva osa
         sp=serial.Serial(port=self.sarjaportti, baudrate=57600,parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=10)
@@ -46,8 +56,6 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
                         palat=sdata.split(";")
                         pulssit=int(palat[1])
                         vali=float(palat[2])/1000
-                        lampo=float(palat[4])
-                        kosteus=float(palat[5])
                         if self.edArduinonPulssiMaara != 0:
                             lisays=pulssit-self.edArduinonPulssiMaara
                             self.edArduinonPulssiMaara+=lisays
@@ -58,22 +66,21 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
                         if time.time()-self.viimWsLahetysAika >= self.maxAliveTiheys or self.viimWsLahetysAika==0: #ALIVE
                             self.viimWsLahetysAika=time.time()
                             self.viimWsPulssiMaara=self.pulssilaskuri
-                            self.lahetaWs("alive", self.pulssilaskuri, vali, lampo, kosteus)
+                            self.lahetaWs("alive", self.pulssilaskuri, vali)
                         elif time.time()-self.viimWsLahetysAika >= self.maxLahetysTiheys and self.viimWsPulssiMaara != self.pulssilaskuri: #PULSSIT MUUTTUNEET
-                            self.lahetaWs("kulutus", self.pulssilaskuri, vali, lampo, kosteus)
+                            self.lahetaWs("kulutus", self.pulssilaskuri, vali)
                             self.viimWsLahetysAika=time.time()
                             self.viimWsPulssiMaara=self.pulssilaskuri
                     time.sleep(0.05)
                 except:
                     print("sarjaportista tuli paskaa, ohitettu!")
 
-    def lahetaWs(self, tyyppi, pulssienMaara,pulssienVali, lampo, kosteus): #lähetetään ws palvelimelle    
+    def lahetaWs(self, tyyppi, pulssienMaara,pulssienVali): #lähetetään ws palvelimelle    
         tmpKwh="{:.5f}".format(pulssienMaara*1000/self.imp/1000) #kokonaiskulutus kwh
         tmpReaaliaikainen="{:.5f}".format(((1000/self.imp*3600)/pulssienVali)/1000) #kulutusta on tällä hetkellä kW
-        tmpLampo="{:.2f}".format(lampo)
-        tmpKosteus="{:.2f}".format(kosteus)
         #pääohjelman callback 'lahetaWsServerille' hoitaa varsinaisen lähetyksen websocketilla:
-        self.callback((pulssienMaara, tmpKwh, tmpReaaliaikainen, tyyppi, lampo, kosteus)) #tuple (int pulssimäärä, str kokonaiskulutus, str reaaliaik, str info)
+        rivi='{"kwh": "'+tmpKwh+'", "pulssit": "'+str(pulssienMaara)+'", "reaaliaikainen": "'+tmpReaaliaikainen+'", "info": "'+tyyppi+'"}'
+        self.callback(rivi)
 
     def setPulssilukema(self, lukema): #Voidaan asettaa pulssien määrä
         self.pulssilaskuri=lukema
@@ -125,9 +132,8 @@ class WsAsiakas(): #------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------
 
 def lahetaWsServerille(data): #Tämä kutsutaan kun pulssien saatu
-    pulssimaara, kwh, reaaliaik, info, lampo, kosteus = data
-    rivi='{"kwh": "'+kwh+'", "pulssit": "'+str(pulssimaara)+'", "reaaliaikainen": "'+reaaliaik+'", "info": "'+info+'", "lampo": "'+str(lampo)+'", "kosteus": "'+str(kosteus)+'"}'
-    wsAsiakas.lahetaWs(rivi)
+    print(data)
+    wsAsiakas.lahetaWs(data)
 
 def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
     lokita("tallenapulssi pysyvään tiedostoon. lukema on nyt:"+str(mittari.getPulssilukema()))

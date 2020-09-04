@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 # sudo pip3 uninstall websocket_server
 # sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
-# sudo pip3 install watchdog
 #
-# Valvoo /dev/shm/sahkomittari -hakemiston muutoksia. Kun tiedosto muuttuu, lähetetään sen sisältö selaimille websocketilla
+# Vastaanottaa portissa 5007 ohjelmien sisäiseltä socketilta dataa ja lähettää sen edelleen ulospäin näkyvälle websocketille (selaimien käyttöön)
 #
 
 
-import time, threading, os, logging, sys
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-from websocket_server import WebsocketServer
+
+import time, threading, os, logging, sys, json
 from datetime import datetime
+from Viestit import Viestit
+from websocket_server import WebsocketServer
 
-SHMHAKEMISTO="/dev/shm/sahkomittari-server"
 DEBUG=False
 
 def lokita(rivi):
@@ -24,10 +22,12 @@ def lokita(rivi):
             lkirj.write(kello+" "+tamaskripti+": "+rivi+"\n")
 
 def new_client(client, server):    #Uusi asiakas avannut yhteyden.
-    print("liittyi " + str(client))
+    pass
+    #print("liittyi " + str(client))
 
 def client_left(client, server):    #selain katkaissut yhteyden.
-    print("lahti " + str(client))
+    pass
+    #print("lahti " + str(client))
 
 def message_received(client, server, message):    # SELAIMELTA SAAPUVA VIESTI
     print("msg_selaimelta " + str(client)+" "+str(message))
@@ -44,48 +44,38 @@ def wsSelaimille(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
     server.set_fn_message_received(message_received)
     server.run_forever()
 
-
-class Watcher: #Luokka valvoo muuttuneita tiedostoja
-    DIRECTORY_TO_WATCH = SHMHAKEMISTO
-
-    def __init__(self):
-        self.observer = Observer()
-        self.run()
-
-    def run(self):
-        event_handler = Handler()
-        self.observer.schedule(event_handler, self.DIRECTORY_TO_WATCH, recursive=True)
-        self.observer.start()
-        try:
-            while True:
-                time.sleep(5)
-        except:
-            self.observer.stop()
-            print("Error")
-        self.observer.join()
-
-class Handler(FileSystemEventHandler): #Kun tiedostot SHM-hakemistossa muuttuneet
-    @staticmethod
-    def on_any_event(event):
-        if event.is_directory:
-            return None
-        elif event.event_type == 'modified':
-            lokita("Received modified event - %s." % event.src_path)
-            aika=datetime.now().strftime("%H:%M:%S")
-            ip=os.path.basename(event.src_path)
-            try:
-                with open (event.src_path, "r") as fReaali:
-                    tiedot=fReaali.read()
-                    print(tiedot)
-                    kulutus, reaaliaikainen, pulssit, info, lampo, kosteus=tiedot.split(";")
-                lahetaBroadCast('{"elementit": [{"elementti": "nahty_'+ip+'", "arvo": "'+aika+'"}, {"elementti": "kwh_'+ip+'", "arvo": "'+kulutus+'"}, {"elementti": "reaali_'+ip+'", "arvo": "'+reaaliaikainen+'"}, {"elementti": "pulssit_'+ip+'", "arvo": "'+pulssit+'"}, {"elementti": "info_'+ip+'", "arvo" : "'+info+'"}, {"elementti": "lampo_'+ip+'", "arvo" : "'+lampo+'"}, {"elementti": "kosteus_'+ip+'", "arvo" : "'+kosteus+'"} ]}')
-            except:
-                lokita("ERR virhe luettaessa /dev/shm/ tiedostoa. Tiedosto on ehkä tyhjä")
+def on_sanoma(data): #sahkomittari-server lähettää tähän dataa
+    aika=datetime.now().strftime("%H:%M:%S")
+    jdata=json.loads(data)
+    if "wsdataselaimille" in jdata:
+        ip=list(jdata["wsdataselaimille"])[0]
+        sisalto=jdata["wsdataselaimille"][ip]
+        riviselaimille='{"elementit": ['
+        riviselaimille+='{"elementti": "nahty_'+ip+'", "arvo": "'+aika+'"}, '
+        if "kwh" in sisalto:
+            kwh=sisalto["kwh"]
+            riviselaimille+='{"elementti": "kwh_'+ip+'", "arvo": "'+kwh+'"}, '
+        if "reaaliaikainen" in sisalto:
+            reaali=sisalto["reaaliaikainen"]
+            riviselaimille+='{"elementti": "reaali_'+ip+'", "arvo": "'+reaali+'"}, '
+        if "pulssit" in sisalto:
+            pulssit=sisalto["pulssit"]
+            riviselaimille+='{"elementti": "pulssit_'+ip+'", "arvo": "'+pulssit+'"}, '
+        if "info" in sisalto:
+            info=sisalto["info"]
+            riviselaimille+='{"elementti": "info_'+ip+'", "arvo": "'+info+'"}, '
+        if "lampo" in sisalto:
+            lampo=sisalto["lampo"]
+            riviselaimille+='{"elementti": "lampo_'+ip+'", "arvo": "'+lampo+'"}, '
+        if "kosteus" in sisalto:
+            kosteus=sisalto["kosteus"]
+            riviselaimille+='{"elementti": "kosteus_'+ip+'", "arvo": "'+kosteus+'"}, '
+        riviselaimille=riviselaimille[:-2] #viimeinen pilkku ja välilyönti pois
+        riviselaimille+=']}'
+        lahetaBroadCast(riviselaimille)
 
 if __name__ == '__main__':
-    os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
-    threadWatchdogfiles = threading.Thread(target=Watcher)
-    threadWatchdogfiles.start()
+    v=Viestit(on_sanoma) # Tää vastaanottaa varsinaisen sähkömittari serverin välittämää dataa selaimille edelleen
     threadWsSelaimille=threading.Thread(target=wsSelaimille)
     threadWsSelaimille.start()
 

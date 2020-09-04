@@ -4,6 +4,7 @@
 #
 
 from websocket_server import WebsocketServer
+from Viestit import Viestit #luokka socket-viestejen välitykseen ohelmien välillä
 from datetime import datetime
 import time, threading, logging, sys, os, json, logging, urllib.parse, sqlite3
 DEBUG=False
@@ -41,23 +42,24 @@ def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut 
 def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
     lokita("saatu raspilta "+message) #qqq
     asiakasIP, asiakasPortti=(client["address"])
+    selainWsRivi='{"wsdataselaimille": {"'+asiakasIP+'": '+message+'}}'
     jsmessage=json.loads(message)
-    if "konffi" in jsmessage: # asiakas lähettää konffitiedostonsa tänne qEI-KÄYTÖSSÄ
-        konffi=urllib.parse.unquote(jsmessage["konffi"])   # qEI-KÄYTÖSSÄ
-        print(asiakasIP, "-->", konffi)    #  qEI-KÄYTÖSSÄ
-    else: #kulutuslukemia tai alive tulee
+    if "lampo" in jsmessage:
+        lampo=jsmessage.get("lampo","-")
+        kosteus=jsmessage.get("kosteus","-")
+        lampoMuisti[asiakasIP]=lampo
+        kosteusMuisti[asiakasIP]=kosteus
+    if "kwh" in jsmessage:
         kwh=jsmessage.get("kwh")
         pulssit=jsmessage.get("pulssit")
         reaaliaikainen=jsmessage.get("reaaliaikainen")
         info=jsmessage.get("info","-")
-        lampo=jsmessage.get("lampo","-")
-        kosteus=jsmessage.get("kosteus","-")
         kwhMuisti[asiakasIP]=kwh
         pulssiMuisti[asiakasIP]=pulssit
-        lampoMuisti[asiakasIP]=lampo
-        kosteusMuisti[asiakasIP]=kosteus
-        with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
-            fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit+";"+info+";"+lampo+";"+kosteus) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
+    viestit.laheta(selainWsRivi)
+
+        #with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
+        #    fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit+";"+info+";"+lampoMuisti[asiakasIP]+";"+kosteusMuisti[asiakasIP]) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
 
 def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
     server.send_message_to_all(viesti)
@@ -98,7 +100,12 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
     #print("**TALLENNA")
     # !!! Tässä kohtaa voitaisiin lähettää lukemat varsinaiselle pääserverille kun tiedetään missä muodossa
 
+def dataaSelainWebsocketilta(data):
+    pass
+
+
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
+    viestit=Viestit(dataaSelainWebsocketilta) #Oma ohjelmien välinen kommunikointi portissa 5007 oleva socket Viestit.py
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima DATE, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL, ulkokosteus REAL)')
