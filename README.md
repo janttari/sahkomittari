@@ -48,7 +48,7 @@ mene internet-selaimella http://raspi_server_ip
  {"wsdataselaimille": {"192.168.4.222": {"kwh": "2554.69500", "pulssit": "2554695", "reaaliaikainen": "3.43184", "info": "alive"}}}
   
  
-sahkomittari-ws-selaimille.service (--> /opt/sahkomittari-server/sahkomittari-ws-selaimille.py) #lähettää dataa selaimille, kun /dev/shm/sahkomittari -hakemiston data muuttuu  
+sahkomittari-ws-selaimille.service (--> /opt/sahkomittari-server/sahkomittari-ws-selaimille.py) #lähettää dataa selaimille, kun saa tietoa portista 5007.
   
   
 tietokanta asiakkaille:  
