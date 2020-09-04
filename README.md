@@ -45,7 +45,7 @@ mene internet-selaimella http://raspi_server_ip
   
  sahkomittari-server.service (--> /opt/sahkomittari-server/sahkomittari-server.py) #vastaanottaa datan raspberryltä  
  reaaliaikainen lukema löytyy portista 5007, katso: [Viestit.py](linux-server/src/opt/sahkomittari-server/Viestit.py)  
- kokonaikulutus;reaaliaikainen;pulssit;info;lämpötila;kosteus  
+ {"wsdataselaimille": {"192.168.4.222": {"kwh": "2554.69500", "pulssit": "2554695", "reaaliaikainen": "3.43184", "info": "alive"}}}
   
  
 sahkomittari-ws-selaimille.service (--> /opt/sahkomittari-server/sahkomittari-ws-selaimille.py) #lähettää dataa selaimille, kun /dev/shm/sahkomittari -hakemiston data muuttuu  
