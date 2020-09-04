@@ -9,7 +9,6 @@ from datetime import datetime
 import time, threading, logging, sys, os, json, logging, urllib.parse, sqlite3
 DEBUG=False
 
-SHMHAKEMISTO="/dev/shm/sahkomittari-server" # tänne tallentuu reaaliaikainen kulutustieto www-pavelinta ja muuta käyttöä varten. Ei säily rebootin jälkeen
 kulutusTietokanta=os.getcwd()+"/opt/sahkomittari-server/data/kulutus.db"
 
 viimTallennusaika="" #Tähän kirjoitetaan milloin pysyvät tiedostot on viimeksi tallennettu HH

@@ -132,7 +132,6 @@ class WsAsiakas(): #------------------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------
 
 def lahetaWsServerille(data): #Tämä kutsutaan kun pulssien saatu
-    print(data)
     wsAsiakas.lahetaWs(data)
 
 def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
