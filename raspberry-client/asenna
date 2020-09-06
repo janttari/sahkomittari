@@ -22,7 +22,7 @@ echo "Tarkistetaan Python-pakettien riippuvuudet..."
 
 echo pyserial
 if [[ -z $(pip3 list|grep "pyserial") ]]; then
-    echo Asennetaan websocket-client
+    echo Asennetaan pyserial
     sudo pip3 install pyserial
 fi
 

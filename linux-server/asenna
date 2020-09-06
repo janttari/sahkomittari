@@ -3,16 +3,16 @@ echo "Tarkistetaan ohjelmistopakettien riippuvuudet..."
 
 sudo apt -y install nginx php7.3-cli php7.3-cgi php7.3-fpm fcgiwrap php7.3-sqlite3 php7.3-zip sqlite3 git python3-pip
 
-echo "websocket_server ( https://github.com/Pithikos/python-websocket-server )"
-if [[ -z $(pip3 list|grep "websocket-server"|grep "0.4") ]]; then
-    echo Asennetaan websocket_server
-    sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
-fi
+#echo "websocket_server ( https://github.com/Pithikos/python-websocket-server )" #sisällytetty nyt muokattuna versiona
+#if [[ -z $(pip3 list|grep "websocket-server"|grep "0.4") ]]; then
+#    echo Asennetaan websocket_server
+#    sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
+#fi
 
-if [[ -z $(pip3 list|grep "watchdog") ]]; then
-    echo Asennetaan watchdog
-    sudo pip3 install watchdog
-fi
+#if [[ -z $(pip3 list|grep "watchdog") ]]; then
+#    echo Asennetaan watchdog
+#    sudo pip3 install watchdog
+#fi
 
 
 echo Kopioidaan tiedostot...
@@ -20,14 +20,11 @@ sudo cp -R src/* /
 
 echo "Sammutetaan palvelut..."
 sudo systemctl stop sahkomittari-server
-sudo systemctl stop sahkomittari-ws-selaimille
 echo "Käynnistetään palvelut..."
 
 sleep 3
 sudo systemctl enable sahkomittari-server #palvelin joka vastaanottaa datan raspberryiltä
 sudo systemctl start sahkomittari-server
-sudo systemctl enable sahkomittari-ws-selaimille #tämä on websocket palvelija internet-selaimille
-sudo systemctl start sahkomittari-ws-selaimille
 sudo systemctl daemon-reload
 sudo chmod -R 777 /www
 sudo chmod a+x /opt/sahkomittari-server/sahkomittari-*
