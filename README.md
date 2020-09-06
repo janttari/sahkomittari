@@ -59,19 +59,6 @@ TODO:
 -tietokantojen varmuuskopiointi-lataus selaimella  
 
 -------
-LOKITUS (SEKÄ CLIENT, ETTÄ SERVER)
-Aseta tiedostoissa:
-```
-/opt/sahkomittari/raspisahkomittari.py
-/opt/sahkomittari-server/sahkomittari-server.py
-/opt/sahkomittari-server/sahkomittari-ws-selaimille.py
-```
-DEBUG = True  
-tai  
-DEBUG = False  
-lokit tallennetaan tiedostoon **/var/log/sahkomittarilokit.txt**  
-
------
 Viestien reitti:  
 selain —>  sahkomittari-server.py —> raspisahkomittari.py —> arduino  
 arduino —> raspisahkomittari.py —> sahkomittari-server.py —> selain  
