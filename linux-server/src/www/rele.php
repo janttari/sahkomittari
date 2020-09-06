@@ -59,8 +59,10 @@ ws.onmessage = function(event) {
         }
 }
 </script>
+<!--
 <a href="asiakashallinta/">[Asiakashallinta]</a> 
 <a href="kuukausiraportit/">[Kuukausiraportit]</a>
+-->
 <br><br>
 <form>
     ip:<input type="text" id="ip"><br>
