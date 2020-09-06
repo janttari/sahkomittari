@@ -9,13 +9,6 @@ skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin 
 config = configparser.ConfigParser(inline_comment_prefixes=('#', ';'))
 config.read(skriptinHakemisto+'/sahkomittari.ini')
 
-def lokita(rivi):
-    if DEBUG:
-        kello=time.strftime("%y%m%d-%H%M%S")
-        tamaskripti=os.path.basename(__file__)
-        with open ("/var/log/sahkomittarilokit.txt", "a") as lkirj:
-            lkirj.write(kello+" "+tamaskripti+": "+rivi+"\n")
-
 class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUKSEEN LIITTYVÄN LASKENNAN --------------------------
     def __init__(self, callback):
         '''self, pulssipinni, viestikanava, pulssiValue, maxLahetysTiheys, maxAliveTiheys, imp_per_kwh'''
@@ -87,7 +80,6 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
 
     def setPulssilukema(self, lukema): #Voidaan asettaa pulssien määrä
         self.pulssilaskuri=lukema
-        lokita("asetetaan mittarilukema: "+str(self.pulssilaskuri))
 
     def getPulssilukema(self):
         return self.pulssilaskuri
@@ -114,34 +106,32 @@ class WsAsiakas(): #------------------------------------------------------------
             mittari.lahetaSarjaporttiin(tavu)
 
     def on_error(self, error):
-        lokita("WS error: "+str(error))
+        pass
 
     def on_close(self, ws):
-        lokita("WS close")
+        pass
 
     def on_open(self):
-        lokita("WS open")
+        pass
 
     def lahetaWs(self, sanoma):
         try:
             self.ws.send(sanoma)
         except: #jos lähetys ei onnistu
-            lokita("ws Virhe viestin lähetyksessä!")
             self.reconnect() #Pyydetään avaamaan ws uudelleen
 
     def reconnect(self): #avaa ws uudelleen
         self.t.join()
         time.sleep(1)
-        lokita("***reconnect ws")
         self.t=threading.Thread(target=self.wsYhteys)
         self.t.start()
 #------------------------------------------------------------------------------------------------------------------------------------
 
 def lahetaWsServerille(data): #Tämä kutsutaan kun pulssien saatu
-    wsAsiakas.lahetaWs(data)
+    wsAsiakas.lahetaWs('{"raspilta": '+data+'}')
 
 def tallennaPulssi(): # Tallentaa pulssilukeman pysyväksi
-    lokita("tallenapulssi pysyvään tiedostoon. lukema on nyt:"+str(mittari.getPulssilukema()))
+    #lokita("tallenapulssi pysyvään tiedostoon. lukema on nyt:"+str(mittari.getPulssilukema()))
     with open(config['yleiset']['pulssipysyva'], "w") as fpulssiTallenna: #tallennetaan pulssien määrä pysyväksi
         fpulssiTallenna.write(str(mittari.getPulssilukema()))
 
@@ -151,7 +141,6 @@ if __name__ == "__main__": #----------------------------------------------------
     mittari=Mittaaja(lahetaWsServerille)
     time.sleep(0.5)
     if os.path.isfile(config['yleiset']['pulssipysyva']): #Jos on olemassa tallennettu pulssilukema
-        lokita("lue kulutus tiedostosta")
         with open(config['yleiset']['pulssipysyva'], "r") as pulssiTiedosto: #Luetaan pulssilukema tiedostosta
             mittari.setPulssilukema(int(pulssiTiedosto.read()))
     while True:

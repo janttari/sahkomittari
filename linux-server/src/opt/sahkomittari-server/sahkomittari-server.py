@@ -1,10 +1,8 @@
 #!/usr/bin/env python3 
-# sudo pip3 uninstall websocket_server sudo pip3 install git+https://github.com/Pithikos/python-websocket-server
-#
 #
 
 from websocket_server import WebsocketServer
-from Viestit import Viestit #luokka socket-viestejen välitykseen ohelmien välillä
+from palveluws import PalveluWs #Websocket-palvelut
 from datetime import datetime
 import time, threading, logging, sys, os, json, logging, urllib.parse, sqlite3
 DEBUG=False
@@ -16,68 +14,8 @@ kwhMuisti={} # {'192.168.4.222': '0.45250'}
 pulssiMuisti={} #ip:pulssit
 lampoMuisti={} #ip:lämpötila
 kosteusMuisti={} #ip:kosteus
-mittariRaspit={} #Tässä liittyneenä olevat mittari-raspit ip:ws_client
-logger = logging.getLogger('websocket_server.WebsocketServer')
-logger.setLevel(logging.CRITICAL)
-logger.addHandler(logging.StreamHandler())
-
-def lokita(rivi):
-    if DEBUG:
-        kello=time.strftime("%y%m%d-%H%M%S")
-        tamaskripti=os.path.basename(__file__)
-        with open ("/var/log/sahkomittarilokit.txt", "a") as lkirj:
-            lkirj.write(kello+" "+tamaskripti+": "+rivi+"\n")
-
-def new_client(client, server):    #Uusi asiakas avannut yhteyden.
-    asiakasip=client["address"][0]
-    mittariRaspit[asiakasip]=client
-
-def client_left(client, server):    #kun mittariraspi tai selain on katkaisssut yhteyden
-    asiakasip=client["address"][0]
-    mittariRaspit.pop(asiakasip)
-
-def message_received(client, server, message):    # RASPILTA SAAPUVA VIESTI
-    lokita("saatu raspilta "+message) #qqq
-    asiakasIP, asiakasPortti=(client["address"])
-    selainWsRivi='{"wsdataselaimille": {"'+asiakasIP+'": '+message+'}}'
-    jsmessage=json.loads(message)
-    if "lampo" in jsmessage:
-        lampo=jsmessage.get("lampo","-")
-        kosteus=jsmessage.get("kosteus","-")
-        lampoMuisti[asiakasIP]=lampo
-        kosteusMuisti[asiakasIP]=kosteus
-    if "kwh" in jsmessage:
-        kwh=jsmessage.get("kwh")
-        pulssit=jsmessage.get("pulssit")
-        reaaliaikainen=jsmessage.get("reaaliaikainen")
-        info=jsmessage.get("info","-")
-        kwhMuisti[asiakasIP]=kwh
-        pulssiMuisti[asiakasIP]=pulssit
-    viestit.laheta(selainWsRivi)
-
-        #with open(SHMHAKEMISTO+"/"+asiakasIP, "w") as fReaaliaikainen:
-        #    fReaaliaikainen.write(kwh+";"+reaaliaikainen+";"+pulssit+";"+info+";"+lampoMuisti[asiakasIP]+";"+kosteusMuisti[asiakasIP]) #/dev/shm/sahkomittari/192.168.4.222 --> 0.44625;0.54517;357 //kwh,reaaliaik kulutus, pulssien määrä
-
-def lahetaBroadCast(viesti):    # LÄHETETÄÄN BROADCAST-VIESTI KAIKILLE
-    #global server #???
-    server.send_message_to_all(viesti)
-
-def lahetaRaspeille(viesti): #Lähetetään kaikille raspeille
-    pass
-
-def lahetaYksityinen(laite, viesti): #lähetetään yksittäiselle laitteelle viesti
-    server.send_message(laite, viesti)
-
-def kuuntelija(): # TÄSSÄ KÄYNNISTETÄÄN VARSINAINEN WEBSOCKET
-    global server
-    server = WebsocketServer(8888, host='0.0.0.0', loglevel=logging.ERROR )
-    server.set_fn_new_client(new_client)
-    server.set_fn_client_left(client_left)
-    server.set_fn_message_received(message_received)
-    server.run_forever()
 
 def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tiedostoon
-    lokita("tallennaPysyvat")
     aika=str(int(time.time())) #unix-aikaleima
     aika=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ulkolampo=-127.0 #haetaan tää lopullisessa versiossa tässä kohtaa serverin mittarilta?
@@ -95,30 +33,56 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
         c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo, ulkokosteus) VALUES("'+aika+'", "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+', '+lampoMuisti[asiakasIP]+', '+kosteusMuisti[asiakasIP]+', '+str(ulkolampo)+', '+str(ulkokosteus)+')')
     conn.commit()
     conn.close()
-    #print("**TALLENNA")
-    # !!! Tässä kohtaa voitaisiin lähettää lukemat varsinaiselle pääserverille kun tiedetään missä muodossa
-
-def dataaSelainWebsocketilta(data):
+#---------------------------------------------------------------------------------------------------------------------------------------------
+def selainWscallback(client, server, data): #Internet-selaimella annetaan komentoja
+    ip = client["address"][0]
     jdata=json.loads(data)
     if "komento" in jdata:
-        kohde=jdata["komento"]["laite"]
+        kohdeip=jdata["komento"]["laite"]
         tavu=jdata["komento"]["tavu"]
-        if kohde in mittariRaspit:
-            lahetaYksityinen(mittariRaspit[kohde], data)
-
+        relerivi='{"komento": {"laite": "'+kohdeip+'", "tavu": "'+tavu+'"}}'
+        mittariWs.lahetaYksityinen(kohdeip, relerivi)
+    
+def mittariWscallback(client, server, data): #Raspberry lähettää mittarin lukemia
+    ip = client["address"][0]
+    jsmessage=json.loads(data)
+    if "raspilta" in jsmessage:
+        jsmessage=jsmessage["raspilta"]
+        aika=datetime.now().strftime("%H:%M:%S")
+        riviselaimille='{"elementit": ['
+        riviselaimille+='{"elementti": "nahty_'+ip+'", "arvo": "'+aika+'"}, '
+        if "info" in jsmessage:
+            info=jsmessage.get("info", "-")
+            riviselaimille+='{"elementti": "info_'+ip+'", "arvo": "'+info+'"}, '
+        if "kwh" in jsmessage:
+            kwhMuisti[ip]=jsmessage["kwh"]
+            riviselaimille+='{"elementti": "kwh_'+ip+'", "arvo": "'+kwhMuisti[ip]+'"}, '
+        if "pulssit" in jsmessage:
+            pulssiMuisti[ip]=kwhMuisti[ip]=jsmessage.get("pulssit", "-")
+            riviselaimille+='{"elementti": "pulssit_'+ip+'", "arvo": "'+pulssiMuisti[ip]+'"}, '
+        if "reaaliaikainen" in jsmessage:
+            reaaliaikainen=jsmessage.get("reaaliaikainen", "-")
+            riviselaimille+='{"elementti": "reaali_'+ip+'", "arvo": "'+reaaliaikainen+'"}, '
+        if "lampo" in jsmessage:
+            lampoMuisti[ip]=jsmessage.get("lampo", "-")
+            riviselaimille+='{"elementti": "lampo_'+ip+'", "arvo": "'+lampoMuisti[ip]+'"}, '
+        if "kosteus" in jsmessage:
+            kosteusMuisti[ip]=jsmessage.get("kosteus", "-")
+            riviselaimille+='{"elementti": "kosteus_'+ip+'", "arvo": "'+kosteusMuisti[ip]+'"}, '
+        riviselaimille=riviselaimille[:-2] #viimeinen pilkku ja välilyönti pois
+        riviselaimille+=']}'
+        selainWs.lahetaKaikille(riviselaimille)
 
 if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
-    viestit=Viestit(dataaSelainWebsocketilta) #Oma ohjelmien välinen kommunikointi portissa 5007 oleva socket Viestit.py
+
+    selainWs=PalveluWs(8889, selainWscallback) #websocket-palvelin selaimille
+    mittariWs=PalveluWs(8888, mittariWscallback) #websocket-palvelin mittari-raspeille
+
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS kulutus (aikaleima DATE, ip TEXT , kwh REAL, pulssit INTEGER, tuntikohtainen REAL, lampo REAL, kosteus REAL, ulkolampo REAL, ulkokosteus REAL)')
     conn.commit()
     conn.close()
-    #os.makedirs( SHMHAKEMISTO, mode=0o777, exist_ok=True)
-    #os.makedirs( TALLENNAPYSYVA, mode=0o777, exist_ok=True )
-    t=threading.Thread(target=kuuntelija)
-    t.start()
-
     kierros=0
     while True: # PÄÄLOOPPI
         time.sleep(1)
@@ -129,5 +93,5 @@ if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
         else:
             if kierros==0:               #jos on ohjelman ensimmäinen suorituskierros, mitään tallennettavaa ei vielä voi olla
                 viimTallennusaika=kello
-                lokita("eka kierros")
+                #print("eka kierros")
         kierros+=1
