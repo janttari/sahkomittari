@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #!!! lisää python-serial riippuvuuksiin ja poista adafruit RPi.GPIO
 #
-import time, os, sys, socket, threading, websocket, configparser, serial, json
-
+import time, os, sys, socket, threading, websocket, configparser, serial, json, adafruit_dht
+#import board
 #----------------------------------------------------------------
 DEBUG=False
 skriptinHakemisto=os.path.dirname(os.path.realpath(__file__)) #Tämän skriptin fyysinen sijainti configia varten
@@ -26,6 +26,10 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
         self.viimWsLahetysAika = 0  #viimeisimmän pulssin aikaleima
         self.sarjaporttiLukija = threading.Thread(target=self.lueSarjaportti) #Lukee pinnin tilan prosessi
         self.sarjaporttiLukija.start()
+        if "lampopinni" in config['yleiset']:
+            self.dhtDevice = adafruit_dht.DHT22(config['yleiset']['lampopinni'])
+        else:
+            self.dhtDevice=None
         self.lammonMittaaja = threading.Thread(target=self.lueLampoanturi)
         self.lammonMittaaja.start()
 
@@ -35,8 +39,18 @@ class Mittaaja(): # TÄMÄ LUOKKA HOITAA VARSINAISEN PINNIN LUKEMISEN JA KULUTUK
 
     def lueLampoanturi(self):
         time.sleep(5)
+        lampo=-123.0
+        kosteus=-65.4
         while True:
-            rivi='{"lampo": "-111.1", "kosteus": "-222.2"}'
+            if self.dhtDevice is not None:
+                try:
+                    lampo = self.dhtDevice.temperature
+                    kosteus = self.dhtDevice.humidity
+                except RuntimeError as error:
+                    print("DHT lukuvirhe",error.args[0])
+                    time.sleep(2.0)
+                    continue
+            rivi='{"lampo": "'+str(lampo)+'", "kosteus": "'+str(kosteus)+'"}'
             self.callback(rivi)
             time.sleep(60)
 

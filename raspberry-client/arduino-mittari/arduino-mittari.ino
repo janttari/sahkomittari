@@ -12,13 +12,13 @@
     INFO KUN OHJELMA ARDUINO KÄYNNISTETÄÄN:
     i;start;versio=2020-09-02
 
-    Arduinolle voi lähettää yhden tavun, joka laittaa 8 lähtöä haluttuun tilaan.
+    Arduinole voi lähettää yhden tavun sarjaportista, joka laittaa 8 lähtöä haluttuun tilaan.
 
 */
 
-#define VERSIO "2020-09-02"
+#define VERSIO "2020-09-07 "
 const byte relePinnit[] = {4, 5, 6, 7, 8, 9, 10, 11}; // näissä pinneissä voi olla rele HUOMAA LÄHETTÄESSÄ BITTIJÄRJESTYS!
-#define LAHETYSVALI 1000 //Lähetetään sarjaporttiin nn millisekunnin välein
+#define LAHETYSVALI 1000 //Lähetetään sarjaporttiin nn millisekunnin välein silloinkin kun reaaliaikaista mittaustietoa ei tule
 
 #include <avr/wdt.h> //Watchdog
 const byte minPulssiPituus = 20;  //Pulssin pitää olla vähintään nn millisekuntia.
@@ -50,7 +50,7 @@ void loop() {
   }
   wdt_reset(); //Watchdogille elossaolosta ilmoitus
 
-  if (Serial.available() > 0) {
+  if (Serial.available() > 0) { //jos sarjaportista on arduinon suuntaan tulevaa dataa
     byte komento = Serial.read();
     for ( int a = 0; a < sizeof (relePinnit) ; a++) {
       if (bitRead(komento, a )) {
@@ -63,19 +63,18 @@ void loop() {
       }
     }
   }
-
   delay(50);
 }
 
-void onPulssi() {
+void onPulssi() { //tämä suoritetaan aina kun mittari-pinnin tila muuttuu joko LOW-->HIGH tai HIGH-->LOW
   bool tila = digitalRead(mittariPinni); //Luetaan onko pulssi tullut HIGH vai mennyt LOW
   if (tila != viimTila) { //Varmistetaan että on todella tapahtunut muutos tilassa
     viimTila = tila;
-    if (tila == HIGH) {
+    if (tila == HIGH) { //mittarin lähettämä pulssitapahtuma alkaa
       alkuaika = millis();
     }
     else {
-      if (millis() - alkuaika >= minPulssiPituus) {
+      if (millis() - alkuaika >= minPulssiPituus) { // jos HIGH tila on ollut riittävän pitkä että se voidaan tulkita impulssiksi
         pulssiLaskuri++;
         Serial.println("r;" + String(pulssiLaskuri) + ";" + String(millis() - viimPulssiAika) + ";"  + String(millis())); //Sanoma **r** reaaliaikanen (kertoo ajan tämän ja edellisen pulssin välillä)
         viimPulssiAika = millis();
