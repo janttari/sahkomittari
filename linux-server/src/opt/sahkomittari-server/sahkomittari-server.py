@@ -87,7 +87,7 @@ if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
     while True: # PÄÄLOOPPI
         time.sleep(1)
         kello=time.strftime("%H")
-        if kello != viimTallennusaika and kierros!=0 #Jos tunti on vaihtunut:
+        if kello != viimTallennusaika and kierros!=0: #Jos tunti on vaihtunut:
             tallennaPysyvat() #Tasatunnein tallennetaan lukemat tietokantaan pysyvästi
             viimTallennusaika=kello
         else:
