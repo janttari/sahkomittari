@@ -22,7 +22,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
     ulkokosteus=-127.0
     conn = sqlite3.connect("/opt/sahkomittari-server/data/kulutus.db")
     c = conn.cursor()
-    for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan
+    for asiakasIP in kwhMuisti: #käydään kaikki asiakkaa läpi yksi kerrallaan #TARKISTA TÄÄ OSUUS, LASKEE VÄÄRIN?
         kys=c.execute('SELECT kwh FROM kulutus WHERE IP="'+asiakasIP+'" ORDER BY aikaleima DESC LIMIT 1') #lasketaan ensin tunnin aikana tapahtunut kulutus vertaamalla nykyistä viimeksi tietokantaan tallennettuun lukemaan
         edtunti=None
         for i in kys:
@@ -30,7 +30,7 @@ def tallennaPysyvat(): # Tallennetaan kulutuslukemat pysyvään paikalliseen tie
         if edtunti is None: #tietokannassa ei vielä ole kulutustietoa...
             edtunti=float(kwhMuisti[asiakasIP]) #...joten kaikki kulutus on tälle tunnille
         tuntikohtainen=str(float(kwhMuisti[asiakasIP])-float(edtunti))
-        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo, ulkokosteus) VALUES("'+aika+'", "'+asiakasIP+'", '+kwhMuisti[asiakasIP]+', '+pulssiMuisti[asiakasIP]+', '+tuntikohtainen+', '+lampoMuisti[asiakasIP]+', '+kosteusMuisti[asiakasIP]+', '+str(ulkolampo)+', '+str(ulkokosteus)+')')
+        c.execute('INSERT into kulutus(aikaleima, ip, kwh, pulssit, tuntikohtainen, lampo, kosteus, ulkolampo, ulkokosteus) VALUES("'+aika+'", "'+asiakasIP+'", '+str(kwhMuisti[asiakasIP])+', '+str(pulssiMuisti[asiakasIP])+', '+str(tuntikohtainen)+', '+str(lampoMuisti[asiakasIP])+', '+str(kosteusMuisti[asiakasIP])+', '+str(ulkolampo)+', '+str(ulkokosteus)+')')
     conn.commit()
     conn.close()
 #---------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ def selainWscallback(client, server, data): #Internet-selaimella annetaan koment
         tavu=jdata["komento"]["tavu"]
         relerivi='{"komento": {"laite": "'+kohdeip+'", "tavu": "'+tavu+'"}}'
         mittariWs.lahetaYksityinen(kohdeip, relerivi)
-    
+
 def mittariWscallback(client, server, data): #Raspberry lähettää mittarin lukemia
     ip = client["address"][0]
     jsmessage=json.loads(data)
@@ -58,7 +58,7 @@ def mittariWscallback(client, server, data): #Raspberry lähettää mittarin luk
             kwhMuisti[ip]=jsmessage["kwh"]
             riviselaimille+='{"elementti": "kwh_'+ip+'", "arvo": "'+kwhMuisti[ip]+'"}, '
         if "pulssit" in jsmessage:
-            pulssiMuisti[ip]=kwhMuisti[ip]=jsmessage.get("pulssit", "-")
+            pulssiMuisti[ip]=jsmessage.get("pulssit", "-")
             riviselaimille+='{"elementti": "pulssit_'+ip+'", "arvo": "'+pulssiMuisti[ip]+'"}, '
         if "reaaliaikainen" in jsmessage:
             reaaliaikainen=jsmessage.get("reaaliaikainen", "-")
@@ -87,7 +87,7 @@ if __name__ == "__main__":    # PÄÄOHJELMA ALKAA
     while True: # PÄÄLOOPPI
         time.sleep(1)
         kello=time.strftime("%H")
-        if kello != viimTallennusaika and kierros!=0: #Jos tunti on vaihtunut:
+        if kello != viimTallennusaika and kierros!=0 #Jos tunti on vaihtunut:
             tallennaPysyvat() #Tasatunnein tallennetaan lukemat tietokantaan pysyvästi
             viimTallennusaika=kello
         else:
