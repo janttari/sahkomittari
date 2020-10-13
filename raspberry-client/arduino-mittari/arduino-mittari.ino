@@ -1,4 +1,6 @@
 /*
+    HUOM! KYTKE A0 HYPPYLANGALLA GND JOS PALOHÄLYTINTÄ EI OLE KYTKETTY SIIHEN!
+
     Laskee sähkömittarin S0 pulsseja ja tulostaa dataa sarjaporttiin.
 
     AJASTETTU SANOMA JOS EI PULSSEJA OLE HETKEEN SAATU:
@@ -9,6 +11,10 @@
     r;32;333;6745
     jossa r on sanoman tyyppi (reaaliaikainen), 32 on pulssien määrä, 333 kahden viim mitatun pulssin väli ms ja 6745 Arduinon sisäinen millis().
 
+    KUN INPUTIN TILA MUUTTUU:
+    h;2;1
+    jossa h on sanoman tyyppi hälytys, 2 on pinnin indeksi-numero ja 1 on tila hälyttää
+
     INFO KUN OHJELMA ARDUINO KÄYNNISTETÄÄN:
     i;start;versio=2020-09-02
 
@@ -16,9 +22,19 @@
 
 */
 
-#define VERSIO "2020-09-07 "
+#define VERSIO "2020-10-13"
 const byte relePinnit[] = {4, 5, 6, 7, 8, 9, 10, 11}; // näissä pinneissä voi olla rele HUOMAA LÄHETTÄESSÄ BITTIJÄRJESTYS!
 #define LAHETYSVALI 1000 //Lähetetään sarjaporttiin nn millisekunnin välein silloinkin kun reaaliaikaista mittaustietoa ei tule
+
+typedef struct inputPinnit { //pinni sekä sallittu alue jonka sisällä tulon arvon pitää olla jottei se hälytä
+  int pinni;
+  int minimi;
+  int maksimi;
+} inputPinnit_t;
+//inputPinnit_t inputit[] = {{A0, 2, 222}, {A1, 3, 333}, {A2, 3, 333}};
+inputPinnit_t inputit[] = {{A0, 0, 500}};
+bool inputPinniTila[sizeof(inputit) / sizeof(int) / 3]; //luetaan analogisten pinnien  tila tähän true=hälyttää, false=ei hälytä
+bool edInputPinniTila[sizeof(inputit) / sizeof(int) / 3]; //pinnien viimeinen tunnettu tila
 
 #include <avr/wdt.h> //Watchdog
 const byte minPulssiPituus = 20;  //Pulssin pitää olla vähintään nn millisekuntia.
@@ -31,13 +47,19 @@ const byte mittariPinni = 2; //S0 tulee tähän pinniin. Pitää olla keskeyttä
 boolean viimTila = LOW; //Pulssin viimeinen tunnettu tila
 
 void setup() {
+  Serial.begin(57600);
+  int pinniMaara = sizeof(inputit) / sizeof(int) / 3; //inputpinnien määrä
+  for (int i = 0; i < pinniMaara; i++) { //alustetaan kaikki tulot ei-hälyttäviksi
+    inputPinniTila[i] = false;
+    edInputPinniTila[i] = false;
+  }
+
   for ( byte a = 0; a < sizeof (relePinnit) ; a++) { //alustetaan releet
     pinMode(relePinnit[a], OUTPUT);
     digitalWrite(relePinnit[a], LOW);
   }
 
   wdt_enable(WDTO_8S); //Watchdog
-  Serial.begin(57600);
   Serial.println("i;start;versio=" + String(VERSIO)); //Sanoma **i** info
   pinMode(mittariPinni, INPUT);
   attachInterrupt(digitalPinToInterrupt(mittariPinni), onPulssi, CHANGE); //Suoritetaan keskeytys tapahtui mikä muutos tahansa
@@ -63,9 +85,28 @@ void loop() {
       }
     }
   }
+  lueInput();
   delay(50);
 }
 
+void lueInput() {
+  int pinniMaara = sizeof(inputit) / sizeof(int) / 3; //inputpinnien määrä
+  for (int i = 0; i < pinniMaara; i++) {
+    int arvo = analogRead(inputit[i].pinni);
+    //Serial.println("Luetaan pinni " + String(inputit[i].pinni) + ":" + String(arvo));
+    if (arvo < inputit[i].minimi || arvo > inputit[i].maksimi) { //hälyttää
+      inputPinniTila[i] = true;
+    }
+    else {
+      inputPinniTila[i] = false;
+    }
+    if (inputPinniTila[i] != edInputPinniTila[i]) { //jos pinnin hälytystila on muuttunut
+      Serial.println("h;" + String(i) + ";" + String(inputPinniTila[i]));
+      edInputPinniTila[i] = inputPinniTila[i];
+    }
+
+  }
+}
 void onPulssi() { //tämä suoritetaan aina kun mittari-pinnin tila muuttuu joko LOW-->HIGH tai HIGH-->LOW
   bool tila = digitalRead(mittariPinni); //Luetaan onko pulssi tullut HIGH vai mennyt LOW
   if (tila != viimTila) { //Varmistetaan että on todella tapahtunut muutos tilassa
