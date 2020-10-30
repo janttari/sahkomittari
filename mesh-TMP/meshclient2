@@ -1,0 +1,73 @@
+#!/bin/bash 
+kanava=11 #palvelu tulee tälle wifi-kanavalle 
+ip=192.168.202.2 #Tämän laitteen ip-osoite 
+gateway=192.168.202.1 #Gateway jonka kautta liikenne kulkee 
+broadcast=192.168.202.255
+#---------------------------------------------------------------------------------------
+taajuudet=(2412 2417 2422 2427 2432 2437 2442 2447 2452 2457 2462 2467 2472 2484)
+#laite=$(iwconfig 2>/dev/null |grep "WIFI@REALTEK"|cut -d ' ' -f 1) #Alfan tikku
+laite=$(sudo lshw -class network|grep rt2800usb -B3|head -n 1|cut -d ':' -f 2|cut -c 2-)
+
+if [[ ! "$laite" ]]; then
+    echo wifi-sovitinta ei löytynyt!
+    exit 1
+fi
+laite=wlan1
+if [[ $1 == "up" ]]; then
+    if (lsmod|grep batman_adv) >/dev/null;then
+        echo "On jo käynnissä!"
+        exit 1
+    fi
+    mhz=${taajuudet[$kanava-1]}
+    echo "Käynnistetään mesh-client taajuudelle $mhz Mhz (wifi-kanava: $kanava) laite: $laite"
+    #sudo modprobe -r 88XXau && sudo modprobe 88XXau rtw_vht_enable=2 rtw_power_mgnt=0 # rtw_enusbss=0
+    #sudo modprobe -r 8812au && sudo modprobe 8812au rtw_power_mgnt=0 rtw_enusbss=0
+    #sleep 3
+    sudo modprobe batman-adv
+    sudo killall wpa_supplicant 2>/dev/null
+    sudo ip link set mtu 1532 dev $laite
+    sleep 1
+    sudo iw $laite set type ibss
+    sudo ip link set $laite up
+    sleep 2
+    sudo iw $laite ibss join mesh $mhz NOHT #HT20
+    sudo batctl ra BATMAN_V
+    #sudo batctl ra BATMAN_IV
+    sudo batctl if add $laite
+    sudo ip link set bat0 up
+    sudo batctl gw_mode client
+    sudo ip link add name mesh-bridge type bridge
+    sudo ip link set dev eth0 master mesh-bridge
+    sudo ip link set dev bat0 master mesh-bridge
+    sudo ip link set up dev eth0
+    sudo ip link set up dev bat0
+    sudo ip link set up dev mesh-bridge
+    sudo ip addr add $ip/24 broadcast $broadcast dev mesh-bridge #!! IP-tähän
+    sudo ip route del default 2>/dev/null
+    sudo ip route add default via $gateway
+    echo -e "Odottaa verkkoa\c"
+    while true; do
+        if ping -c 1 -W 1 8.8.8.8 &> /dev/null
+        then
+            break
+        fi
+        echo -e ".\c"
+        sleep 1
+    done
+    echo
+    echo Valmis
+elif [[ $1 == "down" ]];then
+    if !(lsmod|grep batman_adv) >/dev/null;then
+        echo "Ei ole käynnissä!"
+        exit 1
+    fi
+    sudo ip link set $laite down
+    sudo ip addr flush dev $laite
+    sudo iw $laite set type managed
+    sudo rmmod batman-adv
+    sudo ip link set mtu 1500 dev $laite
+    sudo ip link del mesh-bridge
+else
+    echo "käyttö:"
+    echo "$0 {up|down}"
+fi
